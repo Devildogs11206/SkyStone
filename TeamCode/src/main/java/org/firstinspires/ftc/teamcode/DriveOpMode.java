@@ -52,7 +52,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Pushbot: Teleop POV", group="Pushbot")
+@TeleOp(name="Drive OpMode", group="Pushbot")
 public class DriveOpMode extends LinearOpMode {
 
     /* Declare OpMode members. */
