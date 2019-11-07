@@ -6,15 +6,18 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class MainOpMode extends OpMode {
     private Robot robot;
-    private RobotController robotcontroller;
+    private RobotController driveController;
+    private RobotController liftController;
 
     @Override
     public void init() {
-        robotcontroller = new LiftController(telemetry, gamepad1, robot);
+        driveController = new DriveController(telemetry,gamepad1,robot);
+        liftController = new LiftController(telemetry, gamepad1, robot);
     }
 
     @Override
     public void loop() {
-        robotcontroller.execute();
+        driveController.execute();
+        liftController.execute();
     }
 }

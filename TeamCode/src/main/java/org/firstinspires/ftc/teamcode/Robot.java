@@ -108,5 +108,12 @@ public class Robot
     public void lift(double power) {
         lift_0.setPower(power);
     }
+
+    public void drive (double left, double right){
+        left_drive_0.setPower(left);
+        left_drive_2.setPower(left);
+        right_drive_1.setPower(right);
+        right_drive_3.setPower(right);
+    }
  }
 
