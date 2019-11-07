@@ -104,5 +104,9 @@ public class Robot
         rightClaw.setPosition(MID_SERVO);
         */
     }
+
+    public void lift(double power) {
+        lift_0.setPower(power);
+    }
  }
 
