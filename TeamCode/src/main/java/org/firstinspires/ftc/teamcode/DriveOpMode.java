@@ -29,14 +29,9 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.robot.Robot;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
@@ -56,7 +51,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 public class DriveOpMode extends LinearOpMode {
 
     /* Declare OpMode members. */
-    RobotHardware   robot           = new RobotHardware();   // Use a Pushbot's hardware
+    Robot robot           = new Robot();   // Use a Pushbot's hardware
     double          clawOffset      = 0;                       // Servo mid position
     final double    CLAW_SPEED      = 0.02 ;                   // sets rate to move servo
 

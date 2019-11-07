@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-public class RobotHardware
+public class Robot
 {
     /* Public OpMode members. */
     public DcMotor    left_drive_0   = null;
@@ -56,7 +56,7 @@ public class RobotHardware
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public RobotHardware(){
+    public Robot(){
 
     }
 

@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name="Claw OpMode", group="Pushbot")
 public class ClawOpMode extends LinearOpMode {
 
-    RobotHardware robot = new RobotHardware();
+    Robot robot = new Robot();
 
     private Servo claw_0 = null;
 
