@@ -42,10 +42,11 @@ public class Robot
     public DcMotor    left_drive_2   = null;
     public DcMotor    right_drive_1  = null;
     public DcMotor    right_drive_3  = null;
+
     public DcMotor    lift_0         = null;
-    //public DcMotor  leftArm        = null;
-    //public Servo    leftClaw       = null;
-    //public Servo    rightClaw      = null;
+    public DcMotor    slide          = null;
+
+    public Servo      claw_0         = null;
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -70,8 +71,13 @@ public class Robot
         left_drive_2  = hwMap.get(DcMotor.class,"left_drive_2");
         right_drive_1 = hwMap.get(DcMotor.class, "right_drive_1");
         right_drive_3 = hwMap.get(DcMotor.class,"right_drive_3");
+
         lift_0        = hwMap.get(DcMotor.class, "lift_0");
-        //leftArm    = hwMap.get(DcMotor.class, "left_arm");
+        slide         = hwMap.get(DcMotor.class,"slide");
+
+        claw_0        = hwMap.get(Servo.class, "claw_0");
+
+
         left_drive_0.setDirection(DcMotor.Direction.REVERSE);
         left_drive_2.setDirection(DcMotor.Direction.REVERSE);
         right_drive_1.setDirection(DcMotor.Direction.FORWARD);
@@ -82,7 +88,9 @@ public class Robot
         left_drive_2.setPower(0);
         right_drive_1.setPower(0);
         right_drive_3.setPower(0);
-        //leftArm.setPower(0);
+
+        lift_0.setPower(0);
+        slide.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
@@ -91,22 +99,14 @@ public class Robot
         right_drive_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         right_drive_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-
-
-
-        //leftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Define and initialize ALL installed servos.
-        /*
-        leftClaw  = hwMap.get(Servo.class, "left_hand");
-        rightClaw = hwMap.get(Servo.class, "right_hand");
-        leftClaw.setPosition(MID_SERVO);
-        rightClaw.setPosition(MID_SERVO);
-        */
     }
 
     public void lift(double power) {
         lift_0.setPower(power);
+    }
+
+    public void slide(double power){
+        slide.setPower(power);
     }
 
     public void drive (double left, double right){
@@ -114,6 +114,15 @@ public class Robot
         left_drive_2.setPower(left);
         right_drive_1.setPower(right);
         right_drive_3.setPower(right);
+    }
+    public void moveClaw (double pos){
+
+    }
+    public void openClaw(){
+        claw_0.setPosition(0.7);
+    }
+    public void closeClaw(){
+        claw_0.setPosition(1);
     }
  }
 
