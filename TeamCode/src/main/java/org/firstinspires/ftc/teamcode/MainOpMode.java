@@ -10,11 +10,15 @@ public class MainOpMode extends OpMode {
 
     @Override
     public void init() {
+        robot = new Robot(hardwareMap);
+
         robotControllers = new RobotController[] {
                 new DriveController(telemetry,gamepad1,robot),
                 new LiftController(telemetry, gamepad1,robot),
                 new ClawController(telemetry,gamepad1,robot)
         };
+
+        robot.init();
     }
 
     @Override

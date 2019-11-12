@@ -9,7 +9,7 @@ public abstract class RobotController {
     public Gamepad gamepad;
     public Robot robot;
 
-    public RobotController (Telemetry telemetry, Gamepad gamepad, Robot robot){
+    public RobotController(Telemetry telemetry, Gamepad gamepad, Robot robot) {
         this.telemetry = telemetry;
         this.gamepad = gamepad;
         this.robot = robot;

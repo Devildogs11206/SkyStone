@@ -16,6 +16,8 @@ public class LiftController extends RobotController {
             robot.lift(.50);
         } else if (gamepad.dpad_down) {
             robot.lift(-.50);
+        } else {
+            robot.lift( 0);
         }
     }
 }

@@ -35,8 +35,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-public class Robot
-{
+public class Robot {
     /* Public OpMode members. */
     public DcMotor    left_drive_0   = null;
     public DcMotor    left_drive_2   = null;
@@ -52,45 +51,26 @@ public class Robot
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
 
-    /* local OpMode members. */
-    HardwareMap hwMap           =  null;
+    HardwareMap hardwareMap = null;
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public Robot(){
-
+    public Robot(HardwareMap hardwareMap) {
+        this.hardwareMap = hardwareMap;
     }
 
     /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap ahwMap) {
-        // Save reference to Hardware map
-        hwMap = ahwMap;
-
+    public void init() {
         // Define and Initialize Motors
-        left_drive_0  = hwMap.get(DcMotor.class, "left_drive_0");
-        left_drive_2  = hwMap.get(DcMotor.class,"left_drive_2");
-        right_drive_1 = hwMap.get(DcMotor.class, "right_drive_1");
-        right_drive_3 = hwMap.get(DcMotor.class,"right_drive_3");
-
-        lift_0        = hwMap.get(DcMotor.class, "lift_0");
-        slide         = hwMap.get(DcMotor.class,"slide");
-
-        claw_0        = hwMap.get(Servo.class, "claw_0");
-
+        left_drive_0 = hardwareMap.get(DcMotor.class, "left_drive_0");
+        left_drive_2 = hardwareMap.get(DcMotor.class,"left_drive_2");
+        right_drive_1 = hardwareMap.get(DcMotor.class, "right_drive_1");
+        right_drive_3 = hardwareMap.get(DcMotor.class,"right_drive_3");
 
         left_drive_0.setDirection(DcMotor.Direction.REVERSE);
         left_drive_2.setDirection(DcMotor.Direction.REVERSE);
         right_drive_1.setDirection(DcMotor.Direction.FORWARD);
         right_drive_3.setDirection(DcMotor.Direction.FORWARD);
-
-        // Set all motors to zero power
-        left_drive_0.setPower(0);
-        left_drive_2.setPower(0);
-        right_drive_1.setPower(0);
-        right_drive_3.setPower(0);
-
-        lift_0.setPower(0);
-        slide.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
@@ -99,6 +79,19 @@ public class Robot
         right_drive_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         right_drive_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // Set all motors to zero power
+        left_drive_0.setPower(0);
+        left_drive_2.setPower(0);
+        right_drive_1.setPower(0);
+        right_drive_3.setPower(0);
+
+        lift_0 = hardwareMap.get(DcMotor.class, "lift_0");
+        lift_0.setPower(0);
+
+        claw_0 = hardwareMap.get(Servo.class, "claw_0");
+
+        slide = hardwareMap.get(DcMotor.class,"slide");
+        slide.setPower(0);
     }
 
     public void lift(double power) {
@@ -118,11 +111,12 @@ public class Robot
     public void moveClaw (double pos){
 
     }
+
     public void openClaw(){
         claw_0.setPosition(0.7);
     }
+
     public void closeClaw(){
         claw_0.setPosition(1);
     }
  }
-
