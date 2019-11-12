@@ -31,12 +31,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-public class Robot
-{
+public class Robot {
     /* Public OpMode members. */
     public DcMotor    left_drive_0   = null;
     public DcMotor    left_drive_2   = null;
@@ -51,27 +49,24 @@ public class Robot
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
 
-    /* local OpMode members. */
-    HardwareMap hwMap           =  null;
+    HardwareMap hardwareMap = null;
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public Robot(){
-
+    public Robot(HardwareMap hardwareMap) {
+        this.hardwareMap = hardwareMap;
     }
 
     /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap ahwMap) {
-        // Save reference to Hardware map
-        hwMap = ahwMap;
-
+    public void init() {
         // Define and Initialize Motors
-        left_drive_0  = hwMap.get(DcMotor.class, "left_drive_0");
-        left_drive_2  = hwMap.get(DcMotor.class,"left_drive_2");
-        right_drive_1 = hwMap.get(DcMotor.class, "right_drive_1");
-        right_drive_3 = hwMap.get(DcMotor.class,"right_drive_3");
-        lift_0        = hwMap.get(DcMotor.class, "lift_0");
-        //leftArm    = hwMap.get(DcMotor.class, "left_arm");
+        left_drive_0 = hardwareMap.get(DcMotor.class, "left_drive_0");
+        left_drive_2 = hardwareMap.get(DcMotor.class,"left_drive_2");
+        right_drive_1 = hardwareMap.get(DcMotor.class, "right_drive_1");
+        right_drive_3 = hardwareMap.get(DcMotor.class,"right_drive_3");
+        lift_0 = hardwareMap.get(DcMotor.class, "lift_0");
+        //leftArm = hardwareMap.get(DcMotor.class, "left_arm");
+
         left_drive_0.setDirection(DcMotor.Direction.REVERSE);
         left_drive_2.setDirection(DcMotor.Direction.REVERSE);
         right_drive_1.setDirection(DcMotor.Direction.FORWARD);
@@ -82,7 +77,6 @@ public class Robot
         left_drive_2.setPower(0);
         right_drive_1.setPower(0);
         right_drive_3.setPower(0);
-        //leftArm.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
@@ -91,15 +85,12 @@ public class Robot
         right_drive_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         right_drive_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-
-
-
         //leftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
         /*
-        leftClaw  = hwMap.get(Servo.class, "left_hand");
-        rightClaw = hwMap.get(Servo.class, "right_hand");
+        leftClaw  = hardwareMap.get(Servo.class, "left_hand");
+        rightClaw = hardwareMap.get(Servo.class, "right_hand");
         leftClaw.setPosition(MID_SERVO);
         rightClaw.setPosition(MID_SERVO);
         */

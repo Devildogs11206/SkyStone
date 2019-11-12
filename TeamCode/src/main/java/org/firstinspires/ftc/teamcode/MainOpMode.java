@@ -11,8 +11,11 @@ public class MainOpMode extends OpMode {
 
     @Override
     public void init() {
+        robot = new Robot(hardwareMap);
         driveController = new DriveController(telemetry,gamepad1,robot);
         liftController = new LiftController(telemetry, gamepad1, robot);
+
+        robot.init();
     }
 
     @Override
