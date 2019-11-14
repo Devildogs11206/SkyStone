@@ -90,7 +90,7 @@ public class Robot {
 
         claw_0 = hardwareMap.get(Servo.class, "claw_0");
 
-        slide = hardwareMap.get(DcMotor.class,"slide");
+        slide = hardwareMap.get(DcMotor.class,"lift_0");
         slide.setPower(0);
     }
 

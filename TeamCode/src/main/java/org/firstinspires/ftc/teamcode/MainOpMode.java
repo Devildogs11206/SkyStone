@@ -15,7 +15,8 @@ public class MainOpMode extends OpMode {
         robotControllers = new RobotController[] {
                 new DriveController(telemetry,gamepad1,robot),
                 new LiftController(telemetry, gamepad1,robot),
-                new ClawController(telemetry,gamepad1,robot)
+                new ClawController(telemetry,gamepad1,robot),
+                new SlideController(telemetry,gamepad1,robot)
         };
 
         robot.init();
