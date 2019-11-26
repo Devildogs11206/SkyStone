@@ -35,6 +35,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 
@@ -53,6 +55,9 @@ public class Robot {
     public WebcamName webcamName;
 
     public int cameraMonitorViewId;
+
+    public Position position = new Position();
+    public Orientation rotation = new Orientation();
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;

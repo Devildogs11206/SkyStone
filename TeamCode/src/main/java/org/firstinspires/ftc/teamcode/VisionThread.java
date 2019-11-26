@@ -83,7 +83,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * is explained below.
  */
 
-public class NavigationThread extends Thread {
+public class VisionThread extends Thread {
 
     // IMPORTANT: If you are using a USB WebCam, you must select CAMERA_CHOICE = BACK; and PHONE_IS_PORTRAIT = false;
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
@@ -102,7 +102,7 @@ public class NavigationThread extends Thread {
      * and paste it in to your code on the next line, between the double quotes.
      */
     private static final String VUFORIA_KEY =
-            " --- YOUR NEW VUFORIA KEY GOES HERE  --- ";
+            "ARamgZ3/////AAABmb/8COrlYkzjkpr2MsKcDJpcbuv0xKXvLyTMSLb4kAcVeN8A560evWWup58hT12DOf5dGmaTtmR9OZaXZLgR41YJOte87AcvnY409wWEO3qp1y8iMpzVKDPZl6vXN+C9+8EnwojYg4ZcNsbCYQsu79Ghetb/Kji0CYUG/3HEvNkbd669uiL6zFWW+zllIh9x0ceLZLxKqIVGQGpamxt26UU8wYO2FqVoSo+DIZcofulZkv/MGNkAXdisHuclym2IjfW8yAEgLcJOgW2PKGNkLMj7lPYMNhK/5cpDM/zsTSW+SdPACaUzvmfK+h5iqreD569EpTk2P5tnZeo8e5hnbzWsA1CGGtvA5Z/ZhKjRjtqk";
 
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
@@ -137,7 +137,7 @@ public class NavigationThread extends Thread {
 
     private Boolean aborted = false;
 
-    public NavigationThread (Telemetry telemetry, Robot robot){
+    public VisionThread(Telemetry telemetry, Robot robot){
         this.telemetry = telemetry;
         this.robot = robot;
     }
@@ -352,8 +352,13 @@ public class NavigationThread extends Thread {
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            }
-            else {
+
+                robot.position.x = translation.get(0) / mmPerInch;
+                robot.position.y = translation.get(1) / mmPerInch;
+                robot.position.z = translation.get(2) / mmPerInch;
+
+                robot.rotation = Orientation.getOrientation(lastLocation,EXTRINSIC,XYZ,DEGREES);
+            }else{
                 telemetry.addData("Visible Target", "none");
             }
             telemetry.update();
