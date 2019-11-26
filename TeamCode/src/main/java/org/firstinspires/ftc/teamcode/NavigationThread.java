@@ -127,12 +127,6 @@ public class NavigationThread extends Thread {
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia = null;
 
-    /**
-     * This is the webcam we are to use. As with other hardware devices such as motors and
-     * servos, this device is identified using the robot configuration tool in the FTC application.
-     */
-    WebcamName webcamName = null;
-
     private boolean targetVisible = false;
     private float phoneXRotate    = 0;
     private float phoneYRotate    = 0;
@@ -141,6 +135,8 @@ public class NavigationThread extends Thread {
     private Telemetry telemetry;
     private Robot robot;
 
+    private Boolean aborted = false;
+
     public NavigationThread (Telemetry telemetry, Robot robot){
         this.telemetry = telemetry;
         this.robot = robot;
@@ -148,18 +144,8 @@ public class NavigationThread extends Thread {
 
 
     @Override public void run() {
-        /*
-         * Retrieve the camera we are to use.
-         */
-        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
 
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
-         * If no camera monitor is desired, use the parameter-less constructor instead (commented out below).
-         */
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(robot.cameraMonitorViewId);
 
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
@@ -168,7 +154,7 @@ public class NavigationThread extends Thread {
         /**
          * We also indicate which camera on the RC we wish to use.
          */
-        parameters.cameraName = webcamName;
+        parameters.cameraName = robot.webcamName;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -337,7 +323,7 @@ public class NavigationThread extends Thread {
         // Tap the preview window to receive a fresh image.
 
         targetsSkyStone.activate();
-        while (!isStopRequested()) {
+        while (!aborted) {
 
             // check all the trackable targets to see which one (if any) is visible.
             targetVisible = false;
@@ -375,5 +361,9 @@ public class NavigationThread extends Thread {
 
         // Disable Tracking when we are done;
         targetsSkyStone.deactivate();
+    }
+
+    public void abort (){
+        aborted = true;
     }
 }

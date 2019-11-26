@@ -34,6 +34,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+
 
 public class Robot {
     /* Public OpMode members. */
@@ -46,6 +49,10 @@ public class Robot {
     public DcMotor    slide          = null;
 
     public Servo      claw_0         = null;
+
+    public WebcamName webcamName;
+
+    public int cameraMonitorViewId;
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -92,6 +99,10 @@ public class Robot {
 
         slide = hardwareMap.get(DcMotor.class,"lift_0");
         slide.setPower(0);
+
+        webcamName = hardwareMap.get(WebcamName.class,"Webcam 1");
+
+        cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
     }
 
     public void lift(double power) {

@@ -33,4 +33,9 @@ public class MainOpMode extends OpMode {
         }
 
     }
+
+    @Override
+    public void stop() {
+        navigationThread.abort();
+    }
 }
