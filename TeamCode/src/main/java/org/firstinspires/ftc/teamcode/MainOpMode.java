@@ -24,10 +24,8 @@ public class MainOpMode extends OpMode {
 
     @Override
     public void loop() {
-
         for(RobotController controller : robotControllers){
             controller.execute();
         }
-
     }
 }
