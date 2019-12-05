@@ -108,6 +108,11 @@ public class Robot {
         right_drive_1.setPower(right);
         right_drive_3.setPower(right);
     }
+
+    public void drive (double angle,double power,double rotation ){
+
+    }
+
     public void moveClaw (double pos){
 
     }
