@@ -38,6 +38,10 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Robot {
@@ -54,7 +58,10 @@ public class Robot {
 
     public WebcamName webcamName;
 
+    public List<Recognition> recognitions = new ArrayList<>();
+
     public int cameraMonitorViewId;
+    public int tfodMonitorViewId;
 
     public Position position = new Position();
     public Orientation rotation = new Orientation();
@@ -108,6 +115,7 @@ public class Robot {
         webcamName = hardwareMap.get(WebcamName.class,"Webcam 1");
 
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("tfodMonitorViewId","id",hardwareMap.appContext.getPackageName());
     }
 
     public void lift(double power) {
