@@ -10,14 +10,19 @@ public class LiftController extends RobotController {
         super(telemetry, gamepad, robot);
     }
 
+    public double liftStrength = 0.5;
+
+
     @Override
     public void execute() {
         if (gamepad.dpad_up){
-            robot.lift(.50);
+            robot.lift(liftStrength);
         } else if (gamepad.dpad_down) {
-            robot.lift(-.50);
+            robot.lift(-liftStrength);
         } else {
             robot.lift( 0);
         }
     }
+
+
 }

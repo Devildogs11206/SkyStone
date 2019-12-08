@@ -12,7 +12,7 @@ public class MainOpMode extends OpMode {
 
     @Override
     public void init() {
-        robot = new Robot(hardwareMap);
+        robot = new Robot(telemetry, hardwareMap);
 
         robotControllers = new RobotController[] {
                 new DriveController(telemetry,gamepad1,robot),

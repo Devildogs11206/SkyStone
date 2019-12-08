@@ -4,7 +4,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Robot {
+    private Telemetry telemetry;
     private HardwareMap hardwareMap;
 
     private DcMotor left_front;
@@ -17,7 +20,12 @@ public class Robot {
 
     private Servo claw;
 
-    public Robot(HardwareMap hardwareMap) {
+
+    public double liftStrength = 0.2;
+
+
+    public Robot(Telemetry telemetry, HardwareMap hardwareMap) {
+        this.telemetry = telemetry;
         this.hardwareMap = hardwareMap;
     }
 
@@ -67,12 +75,34 @@ public class Robot {
         slide.setPower(power);
     }
 
-    public void lift(double power) {
+    public void tilt(double power) {
         lift.setPower(power);
     }
 
-    public void tilt(double power) {
-        lift.setPower(power);
+    String liftStatus;
+
+    int maxPos = 1000;
+    int minPos = 0;
+
+
+    public void lift(double power){
+
+        int position = lift.getCurrentPosition();
+
+        if((power>0 && position< maxPos) || (power<0 && position> minPos)){
+
+            lift.setPower(power);
+            liftStatus = "Lift in motion";
+            telemetry.addData("Lift Status",liftStatus);
+            telemetry.update();
+
+        }
+        else{
+            lift.setPower(0);
+            liftStatus = "Limit exceeded";
+            telemetry.addData("Lift Status",liftStatus);
+            telemetry.update();
+        }
     }
 
     public void openClaw(){
