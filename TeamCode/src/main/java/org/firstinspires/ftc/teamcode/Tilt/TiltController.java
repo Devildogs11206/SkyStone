@@ -14,9 +14,9 @@ public class TiltController extends RobotController {
     @Override
     public void execute() {
         if (gamepad.left_trigger >0){
-            robot.tilt(.20);
+            robot.tilt(gamepad.left_trigger);
         } else if (gamepad.right_trigger >0) {
-            robot.tilt(-.20);
+            robot.tilt(-gamepad.right_trigger);
         } else {
             robot.tilt( 0);
         }
