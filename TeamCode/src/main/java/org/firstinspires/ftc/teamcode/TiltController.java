@@ -1,10 +1,8 @@
-package org.firstinspires.ftc.teamcode.Tilt;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.RobotController;
 
 public class TiltController extends RobotController {
     public TiltController(Telemetry telemetry, Gamepad gamepad, Robot robot) {
@@ -13,9 +11,9 @@ public class TiltController extends RobotController {
 
     @Override
     public void execute() {
-        if (gamepad.left_trigger >0){
+        if (gamepad.left_trigger > 0){
             robot.tilt(gamepad.left_trigger);
-        } else if (gamepad.right_trigger >0) {
+        } else if (gamepad.right_trigger > 0) {
             robot.tilt(-gamepad.right_trigger);
         } else {
             robot.tilt( 0);

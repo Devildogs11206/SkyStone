@@ -11,13 +11,8 @@ public class SlideController extends RobotController{
 
     @Override
     public void execute(){
-
-    //THIS MAY BE BACKWARDS.
-    //USE CAUTION.
-
-        if (gamepad.dpad_left){robot.slide(0.2);}
-        else if (gamepad.dpad_right){robot.slide(-0.2);}
-        else {robot.slide(0);}
-
+        if (gamepad.dpad_left) robot.slide(0.2);
+        else if (gamepad.dpad_right) robot.slide(-0.2);
+        else robot.slide(0);
     }
 }
