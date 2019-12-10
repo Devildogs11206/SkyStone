@@ -48,6 +48,7 @@ public class Robot {
 
         lift = hardwareMap.get(DcMotor.class, "lift");
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         tilt = hardwareMap.get(DcMotor.class, "tilt");
 
@@ -58,6 +59,7 @@ public class Robot {
 
         slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
         slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
+
     }
 
     public void drive (double left, double right){
@@ -83,24 +85,25 @@ public class Robot {
         tilt.setPower(power);
     }
 
-    String liftStatus;
-    int minPos = 0;
-    int maxPos = 1000;
 
     public void lift(double power){
+
+        String liftStatus;
+        int minPos = 0;
+        int maxPos = 1000;
+
         int position = lift.getCurrentPosition();
 
         if((power > 0 && position < maxPos) || (power < 0 && position > minPos)){
             lift.setPower(power);
             liftStatus = "Lift in motion";
-            telemetry.addData("Lift Status", liftStatus);
-            telemetry.update();
         } else {
             lift.setPower(0);
             liftStatus = "Limit exceeded";
-            telemetry.addData("Lift Status", liftStatus);
-            telemetry.update();
         }
+        telemetry.addData("Lift Status", liftStatus);
+        telemetry.addData("Lift position", position);
+
     }
 
     public void openClaw(){
