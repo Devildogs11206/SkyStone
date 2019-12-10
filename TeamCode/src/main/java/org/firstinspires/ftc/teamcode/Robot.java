@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -19,6 +20,10 @@ public class Robot {
     private DcMotor tilt;
 
     private Servo claw;
+
+    private DigitalChannel slide_limit_front;
+    private DigitalChannel slide_limit_rear;
+
 
     public Robot(Telemetry telemetry, HardwareMap hardwareMap) {
         this.telemetry = telemetry;
@@ -47,6 +52,12 @@ public class Robot {
         tilt = hardwareMap.get(DcMotor.class, "tilt");
 
         claw = hardwareMap.get(Servo.class, "claw");
+
+        slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
+        slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
+
+        slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
+        slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
     }
 
     public void drive (double left, double right){
@@ -56,8 +67,16 @@ public class Robot {
         right_front.setPower(right);
     }
 
-    public void slide(double power){
-        slide.setPower(power);
+    public void slide(double power) {
+        // If the digital channel returns true it's HIGH and the button is unpressed, so we are going to ...
+        boolean limitFront = !slide_limit_front.getState();
+        boolean limitRear = !slide_limit_rear.getState();
+
+        if ((power > 0 && limitRear) || (power < 0 && limitRear)) {
+            slide.setPower(0);
+        } else {
+            slide.setPower(power);
+        }
     }
 
     public void tilt(double power) {
