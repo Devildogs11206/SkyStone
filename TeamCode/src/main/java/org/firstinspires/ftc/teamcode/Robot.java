@@ -108,15 +108,15 @@ public class Robot {
     }
 
     public void openClaw(){
-        claw_left.setPosition(0.4);
-        claw_right.setPosition(0.6);
+        claw_left.setPosition(0.25);
+        claw_right.setPosition(0.75);
         telemetry.addData("Claw Status","open");
         telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
 
     public void closeClaw(){
-        claw_left.setPosition(0.5);
-        claw_right.setPosition(0.5);
+        claw_left.setPosition(0.75);
+        claw_right.setPosition(0.25);
         telemetry.addData("Claw Status","closed");
         telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
