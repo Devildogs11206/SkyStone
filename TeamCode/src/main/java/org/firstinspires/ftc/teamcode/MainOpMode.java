@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class MainOpMode extends OpMode {
     private Robot robot;
     private RobotController[] robotControllers;
-    private VisionThread navigationThread;
 
     @Override
     public void init() {
@@ -22,7 +21,6 @@ public class MainOpMode extends OpMode {
 
         robot.init();
 
-        navigationThread = new VisionThread(telemetry, robot);
     }
 
     @Override
@@ -36,6 +34,6 @@ public class MainOpMode extends OpMode {
 
     @Override
     public void stop() {
-        navigationThread.abort();
+        robot.stop();
     }
 }
