@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -14,18 +14,24 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Robot {
-    /* Public OpMode members. */
-    public DcMotor    left_drive_0   = null;
-    public DcMotor    left_drive_2   = null;
-    public DcMotor    right_drive_1  = null;
-    public DcMotor    right_drive_3  = null;
+    private Telemetry telemetry;
+    private HardwareMap hardwareMap;
 
-    public DcMotor    lift_0         = null;
-    public DcMotor    slide          = null;
+    private DcMotor left_front;
+    private DcMotor left_rear;
+    private DcMotor right_front;
+    private DcMotor right_rear;
+    private DcMotor slide;
+    private DcMotor lift;
+    private DcMotor tilt;
 
-    public Servo      claw_0         = null;
+    private Servo claw;
+
+    private DigitalChannel slide_limit_front;
+    private DigitalChannel slide_limit_rear;
 
     public WebcamName webcamName;
 
@@ -37,53 +43,42 @@ public class Robot {
     public Position position = new Position();
     public Orientation rotation = new Orientation();
 
-    public static final double MID_SERVO       =  0.5 ;
-    public static final double ARM_UP_POWER    =  0.45 ;
-    public static final double ARM_DOWN_POWER  = -0.45 ;
-
-    HardwareMap hardwareMap = null;
-    private ElapsedTime period  = new ElapsedTime();
-
     private VisionThread visionThread;
 
-    /* Constructor */
-    public Robot(HardwareMap hardwareMap) {
+    public Robot(Telemetry telemetry, HardwareMap hardwareMap) {
+        this.telemetry = telemetry;
         this.hardwareMap = hardwareMap;
     }
 
-    /* Initialize standard Hardware interfaces */
     public void init() {
-        // Define and Initialize Motors
-        left_drive_0 = hardwareMap.get(DcMotor.class, "left_drive_0");
-        left_drive_2 = hardwareMap.get(DcMotor.class,"left_drive_2");
-        right_drive_1 = hardwareMap.get(DcMotor.class, "right_drive_1");
-        right_drive_3 = hardwareMap.get(DcMotor.class,"right_drive_3");
+        left_front = hardwareMap.get(DcMotor.class, "left_front");
+        left_front.setDirection(DcMotor.Direction.FORWARD);
 
-        left_drive_0.setDirection(DcMotor.Direction.REVERSE);
-        left_drive_2.setDirection(DcMotor.Direction.REVERSE);
-        right_drive_1.setDirection(DcMotor.Direction.FORWARD);
-        right_drive_3.setDirection(DcMotor.Direction.FORWARD);
+        left_rear = hardwareMap.get(DcMotor.class,"left_rear");
+        left_rear.setDirection(DcMotor.Direction.FORWARD);
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        left_drive_0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        left_drive_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right_drive_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right_drive_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        right_front = hardwareMap.get(DcMotor.class,"right_front");
+        right_front.setDirection(DcMotor.Direction.REVERSE);
 
-        // Set all motors to zero power
-        left_drive_0.setPower(0);
-        left_drive_2.setPower(0);
-        right_drive_1.setPower(0);
-        right_drive_3.setPower(0);
+        right_rear = hardwareMap.get(DcMotor.class, "right_rear");
+        right_rear.setDirection(DcMotor.Direction.REVERSE);
 
-        lift_0 = hardwareMap.get(DcMotor.class, "lift_0");
-        lift_0.setPower(0);
+        slide = hardwareMap.get(DcMotor.class,"slide");
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        claw_0 = hardwareMap.get(Servo.class, "claw_0");
+        lift = hardwareMap.get(DcMotor.class, "lift");
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        slide = hardwareMap.get(DcMotor.class,"lift_0");
-        slide.setPower(0);
+        tilt = hardwareMap.get(DcMotor.class, "tilt");
+
+        claw = hardwareMap.get(Servo.class, "claw");
+
+        slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
+        slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
+
+        slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
+        slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
 
         webcamName = hardwareMap.get(WebcamName.class,"Webcam 1");
 
@@ -92,35 +87,63 @@ public class Robot {
 
         visionThread = new VisionThread(null,this);
         visionThread.start();
-    }
 
-    public void lift(double power) {
-        lift_0.setPower(power);
-    }
-
-    public void slide(double power){
-        slide.setPower(power);
     }
 
     public void drive (double left, double right){
-        left_drive_0.setPower(left);
-        left_drive_2.setPower(left);
-        right_drive_1.setPower(right);
-        right_drive_3.setPower(right);
+        left_front.setPower(left);
+        left_rear.setPower(left);
+        right_rear.setPower(right);
+        right_front.setPower(right);
     }
-    public void moveClaw (double pos){
+
+    public void slide(double power) {
+        // If the digital channel returns true it's HIGH and the button is unpressed, so we are going to ...
+        boolean limitFront = !slide_limit_front.getState();
+        boolean limitRear = !slide_limit_rear.getState();
+
+        if ((power > 0 && limitRear) || (power < 0 && limitRear)) {
+            slide.setPower(0);
+        } else {
+            slide.setPower(power);
+        }
+    }
+
+    public void tilt(double power) {
+        tilt.setPower(power);
+    }
+
+
+    public void lift(double power){
+
+        String liftStatus;
+        int minPos = 0;
+        int maxPos = 1000;
+
+        int position = lift.getCurrentPosition();
+
+        if((power > 0 && position < maxPos) || (power < 0 && position > minPos)){
+            lift.setPower(power);
+            liftStatus = "Lift in motion";
+        } else {
+            lift.setPower(0);
+            liftStatus = "Limit exceeded";
+        }
+        telemetry.addData("Lift Status", liftStatus);
+        telemetry.addData("Lift position", position);
 
     }
 
     public void openClaw(){
-        claw_0.setPosition(0.7);
+        claw.setPosition(0.7);
     }
 
     public void closeClaw(){
-        claw_0.setPosition(1);
+        claw.setPosition(1);
     }
 
     public void stop(){
         visionThread.abort();
     }
  }
+

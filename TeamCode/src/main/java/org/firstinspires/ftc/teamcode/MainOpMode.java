@@ -10,13 +10,14 @@ public class MainOpMode extends OpMode {
 
     @Override
     public void init() {
-        robot = new Robot(hardwareMap);
+        robot = new Robot(telemetry, hardwareMap);
 
         robotControllers = new RobotController[] {
-                new DriveController(telemetry,gamepad1,robot),
-                new LiftController(telemetry, gamepad1,robot),
-                new ClawController(telemetry,gamepad1,robot),
-                new SlideController(telemetry,gamepad1,robot)
+            new DriveController(telemetry,gamepad1,robot),
+            new LiftController(telemetry, gamepad1,robot),
+            new ClawController(telemetry,gamepad1,robot),
+            new SlideController(telemetry,gamepad1,robot),
+            new TiltController(telemetry, gamepad1, robot)
         };
 
         robot.init();
@@ -25,11 +26,11 @@ public class MainOpMode extends OpMode {
 
     @Override
     public void loop() {
-
         for(RobotController controller : robotControllers){
             controller.execute();
         }
 
+        telemetry.update();
     }
 
     @Override
