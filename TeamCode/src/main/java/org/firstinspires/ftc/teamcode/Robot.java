@@ -45,10 +45,12 @@ public class Robot {
 
         slide = hardwareMap.get(DcMotor.class,"slide");
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slide.setDirection(DcMotor.Direction.REVERSE);
 
         lift = hardwareMap.get(DcMotor.class, "lift");
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setDirection(DcMotor.Direction.REVERSE);
 
         tilt = hardwareMap.get(DcMotor.class, "tilt");
 
@@ -89,7 +91,7 @@ public class Robot {
 
         String liftStatus;
         int minPos = 0;
-        int maxPos = 1000;
+        int maxPos = 8000;
 
         int position = lift.getCurrentPosition();
 
@@ -106,15 +108,15 @@ public class Robot {
     }
 
     public void openClaw(){
-        //claw_left.setPosition(0.4);
-        //claw_right.setPosition(0.6);
+        claw_left.setPosition(0.4);
+        claw_right.setPosition(0.6);
         telemetry.addData("Claw Status","open");
         telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
 
     public void closeClaw(){
-        //claw_left.setPosition(0.5);
-        //claw_right.setPosition(0.5);
+        claw_left.setPosition(0.5);
+        claw_right.setPosition(0.5);
         telemetry.addData("Claw Status","closed");
         telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
