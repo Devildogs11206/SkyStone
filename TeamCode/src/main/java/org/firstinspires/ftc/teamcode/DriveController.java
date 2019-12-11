@@ -12,21 +12,19 @@ public class DriveController extends RobotController{
 
     @Override
     public void execute() {
+        double drive = gamepad.left_stick_y;
+        double turn = gamepad.right_stick_x;
 
-        double drive = -gamepad.left_stick_y;
-        double turn  =  gamepad.right_stick_x;
-
-        double left  = drive + turn;
+        double left = drive + turn;
         double right = drive - turn;
 
         double max = Math.max(Math.abs(left), Math.abs(right));
-        if (max > 1.0)
-        {
+
+        if (max > 1.0) {
             left /= max;
             right /= max;
         }
 
-        robot.drive(left,right);
-
+        robot.drive(left, right);
     }
 }
