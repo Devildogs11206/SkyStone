@@ -65,6 +65,7 @@ public class Robot {
     }
 
     public void drive (double left, double right){
+
         left_front.setPower(left);
         left_rear.setPower(left);
         right_rear.setPower(right);
