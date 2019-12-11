@@ -19,11 +19,11 @@ public class Robot {
     private DcMotor lift;
     private DcMotor tilt;
 
-    private Servo claw;
+    private Servo claw_left;
+    private Servo claw_right;
 
     private DigitalChannel slide_limit_front;
     private DigitalChannel slide_limit_rear;
-
 
     public Robot(Telemetry telemetry, HardwareMap hardwareMap) {
         this.telemetry = telemetry;
@@ -52,14 +52,14 @@ public class Robot {
 
         tilt = hardwareMap.get(DcMotor.class, "tilt");
 
-        claw = hardwareMap.get(Servo.class, "claw");
+        claw_left = hardwareMap.get(Servo.class, "claw_left");
+        claw_right = hardwareMap.get(Servo.class, "claw_right");
 
         slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
         slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
 
         slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
         slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
-
     }
 
     public void drive (double left, double right){
@@ -85,7 +85,6 @@ public class Robot {
         tilt.setPower(power);
     }
 
-
     public void lift(double power){
 
         String liftStatus;
@@ -107,10 +106,16 @@ public class Robot {
     }
 
     public void openClaw(){
-        claw.setPosition(0.7);
+        //claw_left.setPosition(0.4);
+        //claw_right.setPosition(0.6);
+        telemetry.addData("Claw Status","open");
+        telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
 
     public void closeClaw(){
-        claw.setPosition(1);
+        //claw_left.setPosition(0.5);
+        //claw_right.setPosition(0.5);
+        telemetry.addData("Claw Status","closed");
+        telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
 }
