@@ -74,7 +74,7 @@ public class Robot {
         boolean limitFront = !slide_limit_front.getState();
         boolean limitRear = !slide_limit_rear.getState();
 
-        if ((power > 0 && limitRear) || (power < 0 && limitRear)) {
+        if ((power > 0 && limitRear) || (power < 0 && limitFront)) {
             slide.setPower(0);
         } else {
             slide.setPower(power);
