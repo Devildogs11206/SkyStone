@@ -1,127 +1,125 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Robot {
-    /* Public OpMode members. */
-    public DcMotor    left_drive_0   = null;
-    public DcMotor    left_drive_2   = null;
-    public DcMotor    right_drive_1  = null;
-    public DcMotor    right_drive_3  = null;
+    private Telemetry telemetry;
+    private HardwareMap hardwareMap;
 
-    public DcMotor    lift_0         = null;
-    public DcMotor    slide          = null;
+    private DcMotor left_front;
+    private DcMotor left_rear;
+    private DcMotor right_front;
+    private DcMotor right_rear;
+    private DcMotor slide;
+    private DcMotor lift;
+    private DcMotor tilt;
 
-    public Servo      claw_0         = null;
+    private Servo claw_left;
+    private Servo claw_right;
 
-    public static final double MID_SERVO       =  0.5 ;
-    public static final double ARM_UP_POWER    =  0.45 ;
-    public static final double ARM_DOWN_POWER  = -0.45 ;
+    private DigitalChannel slide_limit_front;
+    private DigitalChannel slide_limit_rear;
 
-    HardwareMap hardwareMap = null;
-    private ElapsedTime period  = new ElapsedTime();
-
-    /* Constructor */
-    public Robot(HardwareMap hardwareMap) {
+    public Robot(Telemetry telemetry, HardwareMap hardwareMap) {
+        this.telemetry = telemetry;
         this.hardwareMap = hardwareMap;
     }
 
-    /* Initialize standard Hardware interfaces */
     public void init() {
-        // Define and Initialize Motors
-        left_drive_0 = hardwareMap.get(DcMotor.class, "left_drive_0");
-        left_drive_2 = hardwareMap.get(DcMotor.class,"left_drive_2");
-        right_drive_1 = hardwareMap.get(DcMotor.class, "right_drive_1");
-        right_drive_3 = hardwareMap.get(DcMotor.class,"right_drive_3");
+        left_front = hardwareMap.get(DcMotor.class, "left_front");
+        left_front.setDirection(DcMotor.Direction.FORWARD);
 
-        left_drive_0.setDirection(DcMotor.Direction.REVERSE);
-        left_drive_2.setDirection(DcMotor.Direction.REVERSE);
-        right_drive_1.setDirection(DcMotor.Direction.FORWARD);
-        right_drive_3.setDirection(DcMotor.Direction.FORWARD);
+        left_rear = hardwareMap.get(DcMotor.class,"left_rear");
+        left_rear.setDirection(DcMotor.Direction.FORWARD);
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        left_drive_0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        left_drive_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right_drive_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right_drive_3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        right_front = hardwareMap.get(DcMotor.class,"right_front");
+        right_front.setDirection(DcMotor.Direction.REVERSE);
 
-        // Set all motors to zero power
-        left_drive_0.setPower(0);
-        left_drive_2.setPower(0);
-        right_drive_1.setPower(0);
-        right_drive_3.setPower(0);
+        right_rear = hardwareMap.get(DcMotor.class, "right_rear");
+        right_rear.setDirection(DcMotor.Direction.REVERSE);
 
-        lift_0 = hardwareMap.get(DcMotor.class, "lift_0");
-        lift_0.setPower(0);
+        slide = hardwareMap.get(DcMotor.class,"slide");
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slide.setDirection(DcMotor.Direction.REVERSE);
 
-        claw_0 = hardwareMap.get(Servo.class, "claw_0");
+        lift = hardwareMap.get(DcMotor.class, "lift");
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setDirection(DcMotor.Direction.REVERSE);
 
-        slide = hardwareMap.get(DcMotor.class,"lift_0");
-        slide.setPower(0);
-    }
+        tilt = hardwareMap.get(DcMotor.class, "tilt");
 
-    public void lift(double power) {
-        lift_0.setPower(power);
-    }
+        claw_left = hardwareMap.get(Servo.class, "claw_left");
+        claw_right = hardwareMap.get(Servo.class, "claw_right");
 
-    public void slide(double power){
-        slide.setPower(power);
+        slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
+        slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
+
+        slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
+        slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
     }
 
     public void drive (double left, double right){
-        left_drive_0.setPower(left);
-        left_drive_2.setPower(left);
-        right_drive_1.setPower(right);
-        right_drive_3.setPower(right);
+        left_front.setPower(left);
+        left_rear.setPower(left);
+        right_rear.setPower(right);
+        right_front.setPower(right);
     }
 
-    public void drive (double angle,double power,double rotation ){
-
+    public void drive (double angle,double power,double rotation ) {
+        // TODO
     }
 
-    public void moveClaw (double pos){
+    public void slide(double power) {
+        // If the digital channel returns true it's HIGH and the button is unpressed, so we are going to ...
+        boolean limitFront = !slide_limit_front.getState();
+        boolean limitRear = !slide_limit_rear.getState();
 
+        if ((power > 0 && limitRear) || (power < 0 && limitFront)) {
+            slide.setPower(0);
+        } else {
+            slide.setPower(power);
+        }
+    }
+
+    public void tilt(double power) {
+        tilt.setPower(power);
+    }
+
+    public void lift(double power){
+        String liftStatus;
+        int minPos = 0;
+        int maxPos = 8000;
+
+        int position = lift.getCurrentPosition();
+
+        if((power > 0 && position < maxPos) || (power < 0 && position > minPos)){
+            lift.setPower(power);
+            liftStatus = "Lift in motion";
+        } else {
+            lift.setPower(0);
+            liftStatus = "Limit exceeded";
+        }
+        telemetry.addData("Lift Status", liftStatus);
+        telemetry.addData("Lift position", position);
     }
 
     public void openClaw(){
-        claw_0.setPosition(0.7);
+        claw_left.setPosition(0.25);
+        claw_right.setPosition(0.75);
+        telemetry.addData("Claw Status","open");
+        telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
 
     public void closeClaw(){
-        claw_0.setPosition(1);
+        claw_left.setPosition(0.75);
+        claw_right.setPosition(0.25);
+        telemetry.addData("Claw Status","closed");
+        telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
- }
+}

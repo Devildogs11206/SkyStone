@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class LiftController extends RobotController {
+    private double liftStrength = 0.5;
 
     public LiftController(Telemetry telemetry, Gamepad gamepad, Robot robot) {
         super(telemetry, gamepad, robot);
@@ -13,9 +14,9 @@ public class LiftController extends RobotController {
     @Override
     public void execute() {
         if (gamepad.dpad_up){
-            robot.lift(.50);
+            robot.lift(liftStrength);
         } else if (gamepad.dpad_down) {
-            robot.lift(-.50);
+            robot.lift(-liftStrength);
         } else {
             robot.lift( 0);
         }
