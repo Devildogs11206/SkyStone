@@ -11,8 +11,6 @@ public class AutonmousController extends RobotController {
 
     @Override
     public void execute() {
-        if (!gamepad.start) return;
-
         driveUnderBridge();
     }
 

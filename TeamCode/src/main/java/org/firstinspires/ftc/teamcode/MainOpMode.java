@@ -3,23 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
-public class MainOpMode extends LinearOpMode {
-    private Robot robot;
+public abstract class MainOpMode extends LinearOpMode {
+    protected Robot robot;
     private RobotController[] robotControllers;
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(telemetry, hardwareMap);
 
-        robotControllers = new RobotController[] {
-            new AutonmousController(telemetry, gamepad1, robot),
-            new DriveController(telemetry, gamepad1, robot),
-            new LiftController(telemetry, gamepad2, robot),
-            new ClawController(telemetry, gamepad2, robot),
-            new SlideController(telemetry, gamepad2, robot),
-            new TiltController(telemetry, gamepad2, robot)
-        };
+        robotControllers = getRobotControllers();
 
         robot.init();
 
@@ -33,4 +25,7 @@ public class MainOpMode extends LinearOpMode {
             telemetry.update();
         }
     }
+
+    protected abstract RobotController[] getRobotControllers();
+
 }
