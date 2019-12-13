@@ -11,11 +11,12 @@ public class AutonmousController extends RobotController {
 
     @Override
     public void execute() {
+        if (!gamepad.start) return;
 
+        driveUnderBridge();
     }
 
-    protected void driveToSkyStone() {
-
-        //robot.drive();
+    protected void driveUnderBridge() {
+        // TODO
     }
 }

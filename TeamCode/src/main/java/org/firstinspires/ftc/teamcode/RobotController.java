@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public abstract class RobotController {
-    public Telemetry telemetry;
-    public Gamepad gamepad;
-    public Robot robot;
+    protected Telemetry telemetry;
+    protected Gamepad gamepad;
+    protected Robot robot;
 
     public RobotController(Telemetry telemetry, Gamepad gamepad, Robot robot) {
         this.telemetry = telemetry;

@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -9,6 +8,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Robot {
+    private static final double TICKS_PER_INCH = 1120 / (3.95 * Math.PI);
+    private static final double TICKS_PER_DEGREE = 1625 / 90;
+
     private Telemetry telemetry;
     private HardwareMap hardwareMap;
 
@@ -34,19 +36,19 @@ public class Robot {
     public void init() {
         left_front = hardwareMap.get(DcMotor.class, "left_front");
         left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_front.setDirection(DcMotor.Direction.REVERSE);
+        left_front.setDirection(DcMotor.Direction.FORWARD);
 
         left_rear = hardwareMap.get(DcMotor.class,"left_rear");
         left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_rear.setDirection(DcMotor.Direction.REVERSE);
+        left_rear.setDirection(DcMotor.Direction.FORWARD);
 
         right_front = hardwareMap.get(DcMotor.class,"right_front");
         right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_front.setDirection(DcMotor.Direction.FORWARD);
+        right_front.setDirection(DcMotor.Direction.REVERSE);
 
         right_rear = hardwareMap.get(DcMotor.class, "right_rear");
         right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_rear.setDirection(DcMotor.Direction.FORWARD);
+        right_rear.setDirection(DcMotor.Direction.REVERSE);
 
         slide = hardwareMap.get(DcMotor.class,"slide");
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -69,21 +71,28 @@ public class Robot {
         slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
     }
 
-    public void drive (double left, double right){
-        int leftFrontPosition = left_front.getCurrentPosition();
-        int leftRearPosition = left_rear.getCurrentPosition();
-        int rightFrontPosition = right_front.getCurrentPosition();
-        int rightRearPosition = right_rear.getCurrentPosition();
+    public void drive(double drive, double turn) {
+        double left = drive + turn;
+        double right = drive - turn;
 
-        telemetry.addData("encoders", "%d %d %d %d", leftFrontPosition, leftRearPosition, rightFrontPosition, rightRearPosition);
+        double max = Math.max(Math.abs(left), Math.abs(right));
+
+        if (max > 1.0) {
+            left /= max;
+            right /= max;
+        }
 
         left_front.setPower(left);
         left_rear.setPower(left);
-        right_rear.setPower(right);
         right_front.setPower(right);
+        right_rear.setPower(right);
     }
 
-    public void drive (double angle,double power,double rotation ) {
+    public void drive(double drive, double turn, double inches) {
+        // TODO
+    }
+
+    public void turn(double degrees, double power) {
         // TODO
     }
 
@@ -104,7 +113,6 @@ public class Robot {
     }
 
     public void lift(double power){
-        String liftStatus;
         int minPos = 0;
         int maxPos = 8000;
 
@@ -112,27 +120,20 @@ public class Robot {
 
         if((power > 0 && position < maxPos) || (power < 0 && position > minPos)){
             lift.setPower(power);
-            liftStatus = "Lift in motion";
         } else {
             lift.setPower(0);
-            liftStatus = "Limit exceeded";
         }
 
-        telemetry.addData("Lift Status", liftStatus);
-        telemetry.addData("Lift position", position);
+        telemetry.addData("lift", position);
     }
 
-    public void openClaw(){
+    public void openClaw() {
         claw_left.setPosition(0.25);
         claw_right.setPosition(0.75);
-        telemetry.addData("Claw Status","open");
-        telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
 
-    public void closeClaw(){
+    public void closeClaw() {
         claw_left.setPosition(0.75);
         claw_right.setPosition(0.25);
-        telemetry.addData("Claw Status","closed");
-        telemetry.addData("Claw Position","left: %.2f right: %.2f", claw_left.getPosition(), claw_right.getPosition());
     }
 }
