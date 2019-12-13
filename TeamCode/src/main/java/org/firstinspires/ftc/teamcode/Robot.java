@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Robot {
     private static final double TICKS_PER_INCH = 1120 / (3.95 * Math.PI);
-    private static final double TICKS_PER_DEGREE = 1625 / 90;
+    private static final double TICKS_PER_DEGREE = 1120 / 90;
 
     private Telemetry telemetry;
     private HardwareMap hardwareMap;
