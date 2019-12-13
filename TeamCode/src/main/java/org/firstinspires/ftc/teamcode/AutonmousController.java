@@ -17,6 +17,8 @@ public class AutonmousController extends RobotController {
     }
 
     protected void driveUnderBridge() {
-        // TODO
+        robot.drive(.5 ,0,8);
+        robot.turn(-90,.5);
+        robot.drive(.5,0,34);
     }
 }

@@ -89,11 +89,44 @@ public class Robot {
     }
 
     public void drive(double drive, double turn, double inches) {
-        // TODO
+        resetEncoders();
+
+        int position = 0;
+
+        drive(drive, turn);
+
+        while (position < inches * TICKS_PER_INCH) {
+            position = (
+                left_front.getCurrentPosition() +
+                left_rear.getCurrentPosition() +
+                right_front.getCurrentPosition() +
+                right_rear.getCurrentPosition()
+            ) /4;
+
+            Thread.yield();
+        }
+
+        this.drive(0,0);
     }
 
     public void turn(double degrees, double power) {
-        // TODO
+        resetEncoders();
+
+        int position = 0;
+
+        drive(0,degrees / Math.abs(degrees) * power);
+
+        while (position < Math.abs((degrees) * TICKS_PER_DEGREE)) {
+            position = (
+                Math.abs(left_front.getCurrentPosition()) +
+                Math.abs(left_rear.getCurrentPosition()) +
+                Math.abs(right_front.getCurrentPosition()) +
+                Math.abs(right_rear.getCurrentPosition())
+            ) /4;
+
+            Thread.yield();
+        }
+        this.drive(0, 0);
     }
 
     public void slide(double power) {
@@ -135,5 +168,16 @@ public class Robot {
     public void closeClaw() {
         claw_left.setPosition(0.75);
         claw_right.setPosition(0.25);
+    }
+
+    private void resetEncoders() {
+        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
