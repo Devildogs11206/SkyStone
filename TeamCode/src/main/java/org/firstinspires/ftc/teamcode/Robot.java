@@ -89,7 +89,7 @@ public class Robot {
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("tfodMonitorViewId","id",hardwareMap.appContext.getPackageName());
 
-        visionThread = new VisionThread(null,this);
+        visionThread = new VisionThread(telemetry,this);
         visionThread.start();
     }
 
