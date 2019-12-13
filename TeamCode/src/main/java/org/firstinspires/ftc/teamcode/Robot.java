@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -32,15 +33,19 @@ public class Robot {
 
     public void init() {
         left_front = hardwareMap.get(DcMotor.class, "left_front");
+        left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         left_front.setDirection(DcMotor.Direction.REVERSE);
 
         left_rear = hardwareMap.get(DcMotor.class,"left_rear");
+        left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         left_rear.setDirection(DcMotor.Direction.REVERSE);
 
         right_front = hardwareMap.get(DcMotor.class,"right_front");
+        right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_front.setDirection(DcMotor.Direction.FORWARD);
 
         right_rear = hardwareMap.get(DcMotor.class, "right_rear");
+        right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_rear.setDirection(DcMotor.Direction.FORWARD);
 
         slide = hardwareMap.get(DcMotor.class,"slide");
@@ -65,6 +70,13 @@ public class Robot {
     }
 
     public void drive (double left, double right){
+        int leftFrontPosition = left_front.getCurrentPosition();
+        int leftRearPosition = left_rear.getCurrentPosition();
+        int rightFrontPosition = right_front.getCurrentPosition();
+        int rightRearPosition = right_rear.getCurrentPosition();
+
+        telemetry.addData("encoders", "%d %d %d %d", leftFrontPosition, leftRearPosition, rightFrontPosition, rightRearPosition);
+
         left_front.setPower(left);
         left_rear.setPower(left);
         right_rear.setPower(right);
