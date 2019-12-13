@@ -20,7 +20,7 @@ public class DriveController extends RobotController{
         if(gamepad.y){driveSpeed=1.0;}
 
         double drive = gamepad.left_stick_y;
-        double turn = gamepad.right_stick_x;
+        double turn = -gamepad.right_stick_x;
 
         double left = driveSpeed*(drive + turn);
         double right = driveSpeed*(drive - turn);

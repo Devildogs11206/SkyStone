@@ -32,16 +32,16 @@ public class Robot {
 
     public void init() {
         left_front = hardwareMap.get(DcMotor.class, "left_front");
-        left_front.setDirection(DcMotor.Direction.FORWARD);
+        left_front.setDirection(DcMotor.Direction.REVERSE);
 
         left_rear = hardwareMap.get(DcMotor.class,"left_rear");
-        left_rear.setDirection(DcMotor.Direction.FORWARD);
+        left_rear.setDirection(DcMotor.Direction.REVERSE);
 
         right_front = hardwareMap.get(DcMotor.class,"right_front");
-        right_front.setDirection(DcMotor.Direction.REVERSE);
+        right_front.setDirection(DcMotor.Direction.FORWARD);
 
         right_rear = hardwareMap.get(DcMotor.class, "right_rear");
-        right_rear.setDirection(DcMotor.Direction.REVERSE);
+        right_rear.setDirection(DcMotor.Direction.FORWARD);
 
         slide = hardwareMap.get(DcMotor.class,"slide");
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -105,6 +105,7 @@ public class Robot {
             lift.setPower(0);
             liftStatus = "Limit exceeded";
         }
+
         telemetry.addData("Lift Status", liftStatus);
         telemetry.addData("Lift position", position);
     }
