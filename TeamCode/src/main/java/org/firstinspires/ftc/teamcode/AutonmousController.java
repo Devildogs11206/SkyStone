@@ -16,6 +16,8 @@ public class AutonmousController extends RobotController {
     @Override
     public void execute() {
         if(executed)return;
+        robot.slide(0.5,2);
+        robot.tilt(0.5,500);
         switch (mode) {
             case "driveUnderBlueBridge1":
                 driveUnderBlueBridge1();
@@ -28,9 +30,6 @@ public class AutonmousController extends RobotController {
     }
 
     protected void driveUnderBlueBridge1() {
-        robot.drive(.5 ,0,8);
-        robot.turn(-90,.5);
-        robot.drive(.5,0,34);
     }
 
     protected void driveUnderBlueBridge2() {

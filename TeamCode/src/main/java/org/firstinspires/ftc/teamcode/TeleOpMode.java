@@ -1,17 +1,39 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class TeleOpMode extends MainOpMode {
+public class TeleOpMode extends LinearOpMode {
+    protected Robot robot;
+    private RobotController[] robotControllers;
+
     @Override
-    protected RobotController[] getRobotControllers() {
-        return new RobotController[] {
-            new DriveController(telemetry, gamepad1, robot),
-            new LiftController(telemetry, gamepad2, robot),
-            new ClawController(telemetry, gamepad2, robot),
-            new SlideController(telemetry, gamepad2, robot),
-            new TiltController(telemetry, gamepad2, robot)
+    public void runOpMode() throws InterruptedException {
+        robot = new Robot(telemetry, hardwareMap);
+
+        robotControllers = new RobotController[] {
+                new DriveController(telemetry, gamepad1, robot),
+                new LiftController(telemetry, gamepad2, robot),
+                new ClawController(telemetry, gamepad2, robot),
+                new SlideController(telemetry, gamepad2, robot),
+                new TiltController(telemetry, gamepad2, robot),
         };
+
+
+        robot.init();
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+            for (RobotController controller : robotControllers) {
+                controller.execute();
+            }
+
+            robot.addTelemetry();
+            telemetry.update();
+        }
     }
+
+
 }

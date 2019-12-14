@@ -11,7 +11,7 @@ public class ClawController extends RobotController{
 
     @Override
     public void execute() {
-        if (gamepad.left_bumper) robot.openClaw();
-        if (gamepad.right_bumper) robot.closeClaw();
+        if (gamepad.left_bumper) robot.closeClaw();
+        if (gamepad.right_bumper) robot.openClaw();
     }
 }

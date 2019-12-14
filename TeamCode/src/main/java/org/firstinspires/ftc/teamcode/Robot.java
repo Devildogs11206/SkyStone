@@ -60,6 +60,7 @@ public class Robot {
         lift.setDirection(DcMotor.Direction.REVERSE);
 
         tilt = hardwareMap.get(DcMotor.class, "tilt");
+        tilt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         claw_left = hardwareMap.get(Servo.class, "claw_left");
         claw_right = hardwareMap.get(Servo.class, "claw_right");
@@ -141,8 +142,37 @@ public class Robot {
         }
     }
 
+    public void slide(double power, double seconds) {
+
+        slide(power);
+        sleep(seconds);
+        slide(0);
+
+    }
+
     public void tilt(double power) {
         tilt.setPower(power);
+    }
+
+    public void tilt(double power, int position){
+
+        tilt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        tilt.setTargetPosition(position);
+        tilt.setPower(power);
+        while(tilt.isBusy()) {
+            Thread.yield();
+        }
+
+    }
+
+    public void tilt(double power, double seconds) {
+
+        tilt(power);
+        sleep(seconds);
+        tilt(0);
+
     }
 
     public void lift(double power){
@@ -157,17 +187,29 @@ public class Robot {
             lift.setPower(0);
         }
 
-        telemetry.addData("lift", position);
+
     }
 
     public void openClaw() {
-        claw_left.setPosition(0.25);
-        claw_right.setPosition(0.75);
+        claw_left.setPosition(1);
+        claw_right.setPosition(0.25);
     }
 
     public void closeClaw() {
-        claw_left.setPosition(0.75);
-        claw_right.setPosition(0.25);
+        claw_left.setPosition(0.15);
+        claw_right.setPosition(0.85);
+    }
+
+    public void addTelemetry(){
+
+        telemetry.addLine().addData("Left Front","%.2f Pow, %d Pos",left_front.getPower(),left_front.getCurrentPosition());
+        telemetry.addLine().addData("Left Rear","%.2f Pow, %d Pos",left_rear.getPower(),left_rear.getCurrentPosition());
+        telemetry.addLine().addData("Right Front","%.2f Pow, %d Pos",right_front.getPower(),right_front.getCurrentPosition());
+        telemetry.addLine().addData("Right Rear","%.2f Pow, %d Pos",right_rear.getPower(),right_rear.getCurrentPosition());
+        telemetry.addLine().addData("Slide","%.2f Pow, %d Pos",slide.getPower(),slide.getCurrentPosition());
+        telemetry.addLine().addData("Tilt","%.2f Pow, %d Pos",tilt.getPower(),tilt.getCurrentPosition());
+        telemetry.addLine().addData("Lift","%.2f Pow, %d Pos",lift.getPower(),lift.getCurrentPosition());
+
     }
 
     private void resetEncoders() {
@@ -179,5 +221,14 @@ public class Robot {
         right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    private void sleep(double seconds) {
+        try {
+            Thread.sleep((long) (1000*seconds));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
