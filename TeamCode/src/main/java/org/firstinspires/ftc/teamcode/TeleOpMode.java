@@ -4,26 +4,18 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class TeleOpMode extends LinearOpMode {
-    protected Robot robot;
+public class TeleOpMode extends OpMode {
     private RobotController[] robotControllers;
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        robot = new Robot(telemetry, hardwareMap);
-
-        robotControllers = new RobotController[] {
-                new DriveController(telemetry, gamepad1, robot),
-                new LiftController(telemetry, gamepad2, robot),
-                new ClawController(telemetry, gamepad2, robot),
-                new SlideController(telemetry, gamepad2, robot),
-                new TiltController(telemetry, gamepad2, robot),
+    protected void execute() {
+        robotControllers = new RobotController[]{
+            new DriveController(this),
+            new LiftController(this),
+            new ClawController(this),
+            new SlideController(this),
+            new TiltController(this),
         };
-
-
-        robot.init();
-
-        waitForStart();
 
         while (opModeIsActive()) {
             for (RobotController controller : robotControllers) {
@@ -35,5 +27,13 @@ public class TeleOpMode extends LinearOpMode {
         }
     }
 
+    public boolean isActive() {
+        return opModeIsActive();
+    }
 
+    public boolean isContinue() {
+        return isActive() &&
+            (!gamepad1.left_stick_button || !gamepad1.right_stick_button) &&
+            (!gamepad2.left_stick_button || !gamepad2.right_stick_button);
+    }
 }

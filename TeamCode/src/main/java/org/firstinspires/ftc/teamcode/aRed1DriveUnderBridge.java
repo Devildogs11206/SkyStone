@@ -4,16 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous
-public class aRed1DriveUnderBridge extends LinearOpMode {
-    protected Robot robot;
+public class aRed1DriveUnderBridge extends OpMode {
+
+
+
     @Override
-    public void runOpMode() throws InterruptedException {
-        robot = new Robot(telemetry, hardwareMap);
-
-        robot.init();
-
-        waitForStart();
-
+    protected void execute() {
         robot.drive(.5 ,0,8);
         robot.turn(90,.5);
         robot.drive(.5,0,34);

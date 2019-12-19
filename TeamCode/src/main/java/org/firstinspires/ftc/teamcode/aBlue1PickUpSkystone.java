@@ -4,15 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous
-public class aBlue1PickUpSkystone extends LinearOpMode {
-    protected Robot robot;
+public class aBlue1PickUpSkystone extends OpMode {
+
     @Override
-    public void runOpMode() throws InterruptedException {
-        robot = new Robot(telemetry, hardwareMap);
-
-        robot.init();
-
-        waitForStart();
+    protected void execute() {
 
         robot.slide(0.5,1);
         robot.tilt(0.5,1.25);
@@ -33,8 +28,6 @@ public class aBlue1PickUpSkystone extends LinearOpMode {
 
         robot.turn(180,0.5);
         robot.drive(0.5,0,32);
-
-
     }
 
 

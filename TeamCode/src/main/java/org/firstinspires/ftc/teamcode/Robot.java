@@ -143,8 +143,6 @@ public class Robot {
     }
 
     public void slide(double power, double seconds) {
-
-        slide(power);
         sleep(seconds);
         slide(0);
 
@@ -155,7 +153,6 @@ public class Robot {
     }
 
     public void tilt(double power, int position){
-
         tilt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -164,15 +161,12 @@ public class Robot {
         while(tilt.isBusy()) {
             Thread.yield();
         }
-
     }
 
     public void tilt(double power, double seconds) {
-
         tilt(power);
         sleep(seconds);
         tilt(0);
-
     }
 
     public void lift(double power){
@@ -201,7 +195,6 @@ public class Robot {
     }
 
     public void addTelemetry(){
-
         telemetry.addLine().addData("Left Front","%.2f Pow, %d Pos",left_front.getPower(),left_front.getCurrentPosition());
         telemetry.addLine().addData("Left Rear","%.2f Pow, %d Pos",left_rear.getPower(),left_rear.getCurrentPosition());
         telemetry.addLine().addData("Right Front","%.2f Pow, %d Pos",right_front.getPower(),right_front.getCurrentPosition());
@@ -209,7 +202,6 @@ public class Robot {
         telemetry.addLine().addData("Slide","%.2f Pow, %d Pos",slide.getPower(),slide.getCurrentPosition());
         telemetry.addLine().addData("Tilt","%.2f Pow, %d Pos",tilt.getPower(),tilt.getCurrentPosition());
         telemetry.addLine().addData("Lift","%.2f Pow, %d Pos",lift.getPower(),lift.getCurrentPosition());
-
     }
 
     private void resetEncoders() {
@@ -229,6 +221,5 @@ public class Robot {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 }

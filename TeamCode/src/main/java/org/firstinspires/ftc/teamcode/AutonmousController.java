@@ -8,8 +8,8 @@ public class AutonmousController extends RobotController {
     private String mode;
     Boolean executed = false;
 
-    public AutonmousController(Telemetry telemetry, Gamepad gamepad, Robot robot, String mode) {
-        super(telemetry, gamepad, robot);
+    public AutonmousController(OpMode opMode) {
+        super(opMode);
         this.mode = mode;
     }
 
