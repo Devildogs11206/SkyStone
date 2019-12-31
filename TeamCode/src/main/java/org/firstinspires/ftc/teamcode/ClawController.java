@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 public class ClawController extends RobotController{
-    public ClawController(Telemetry telemetry, Gamepad gamepad, Robot robot) {
-        super(telemetry, gamepad, robot);
+    public ClawController(OpMode opMode) {
+        super(opMode);
     }
 
     @Override
     public void execute() {
-        if (gamepad.left_bumper) robot.openClaw();
-        if (gamepad.right_bumper) robot.closeClaw();
+        if (gamepad2.left_bumper) robot.closeClaw();
+        if (gamepad2.right_bumper) robot.openClaw();
     }
 }
