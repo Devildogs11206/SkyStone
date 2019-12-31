@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.internal;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -15,6 +19,8 @@ import java.util.List;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;
@@ -41,8 +47,10 @@ public class Robot {
     public int cameraMonitorViewId;
     public int tfodMonitorViewId;
 
+    BNO055IMU imu;
+
     public Position position = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
-    public Orientation rotation = new Orientation();
+    public Orientation orientation = new Orientation();
     public List<Recognition> recognitions = null;
 
     private VisionThread visionThread;
@@ -53,6 +61,17 @@ public class Robot {
 
     public void init() {
         HardwareMap hardwareMap = opMode.hardwareMap;
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit            = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile  = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled       = true;
+        parameters.loggingTag           = "IMU";
+
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
 
         left_front = hardwareMap.get(DcMotor.class, "left_front");
         left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -219,6 +238,24 @@ public class Robot {
         telemetry.addData("Slide","%.2f Pow, %d Pos", slide.getPower(), slide.getCurrentPosition());
         telemetry.addData("Tilt","%.2f Pow, %d Pos", tilt.getPower(), tilt.getCurrentPosition());
         telemetry.addData("Lift","%.2f Pow, %d Pos", lift.getPower(), lift.getCurrentPosition());
+        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("Orientation", orientation);
+        telemetry.addData("Target", visionThread.targetVisible);
+        telemetry.addData("Position (in)", position);
+
+
+        if (recognitions != null) {
+
+            telemetry.addData("Recognitions", recognitions.size());
+
+            for (Recognition recognition : recognitions) {
+                telemetry.addData("  left,top", "%.3f , %.3f", recognition.getLeft(), recognition.getTop());
+                telemetry.addData("  right,bottom", "%.3f , %.3f", recognition.getRight(), recognition.getBottom());
+                telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
+                telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
+            }
+        }
+
     }
 
     private void resetEncoders() {

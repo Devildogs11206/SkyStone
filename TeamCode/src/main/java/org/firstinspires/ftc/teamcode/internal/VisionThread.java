@@ -10,7 +10,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.internal.Robot;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import java.util.ArrayList;
@@ -198,12 +197,8 @@ public class VisionThread extends Thread {
                     robot.position.z = translation.get(2) / mmPerInch;
                     robot.position.acquisitionTime = System.nanoTime();
 
-                    robot.rotation = Orientation.getOrientation(lastLocation,EXTRINSIC,XYZ,DEGREES);
+                    robot.orientation = Orientation.getOrientation(lastLocation,EXTRINSIC,XYZ,DEGREES);
                 }
-
-                opMode.telemetry.addData("Target", targetVisible);
-                opMode.telemetry.addData("Position (in)", robot.position);
-                opMode.telemetry.addData("Rotation (deg)", robot.rotation);
 
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 
@@ -211,19 +206,6 @@ public class VisionThread extends Thread {
                     robot.recognitions = updatedRecognitions;
                 }
 
-                if (robot.recognitions != null) {
-                    opMode.telemetry.addData("Recognitions", robot.recognitions.size());
-
-                    for (Recognition recognition : robot.recognitions) {
-                        opMode.telemetry.addData("Label", recognition.getLabel());
-                        opMode.telemetry.addData("  left,top", "%.3f , %.3f", recognition.getLeft(), recognition.getTop());
-                        opMode.telemetry.addData("  right,bottom", "%.3f , %.3f", recognition.getRight(), recognition.getBottom());
-                        opMode.telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
-                        opMode.telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
-                    }
-                }
-
-                opMode.telemetry.update();
 
                 opMode.yield();
             }
@@ -231,6 +213,7 @@ public class VisionThread extends Thread {
             targetsSkyStone.deactivate();
         } catch (Exception e){
             opMode.telemetry.addData("VisionThread Error", e);
+            opMode.telemetry.update();
         }
     }
 }
