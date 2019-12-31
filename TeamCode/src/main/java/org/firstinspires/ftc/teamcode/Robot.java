@@ -20,7 +20,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGR
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;
     private static final double TICKS_PER_INCH = 1120 / INCHES_PER_ROTATION;
-    private static final double INCHES_PER_DEGREE = INCHES_PER_ROTATION / 90;
+    private static final double INCHES_PER_DEGREE = INCHES_PER_ROTATION / 120;
 
     private OpMode opMode;
 
@@ -141,8 +141,8 @@ public class Robot {
 
     public void turn(double degrees, double power) {
         double turn = degrees / Math.abs(degrees) * power;
-        double inches = degrees * INCHES_PER_DEGREE;
-        drive(power, turn, inches);
+        double inches = Math.abs(degrees * INCHES_PER_DEGREE);
+        drive(0, turn, inches);
     }
 
     public void slide(double power) {
