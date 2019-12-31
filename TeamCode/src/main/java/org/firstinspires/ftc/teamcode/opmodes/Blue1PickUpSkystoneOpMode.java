@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+
 @Autonomous
-public class aRed1PickUpSkystone extends OpMode {
+public class Blue1PickUpSkystoneOpMode extends OpMode {
     @Override
     protected void execute() {
         robot.slide(0.5,1);
@@ -18,7 +20,7 @@ public class aRed1PickUpSkystone extends OpMode {
 
         robot.drive(0.5,0,24);
 
-        robot.turn(-90,0.5);
+        robot.turn(90,0.5);
         robot.drive(0.5,0,64);
         robot.openClaw();
 

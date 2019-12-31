@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.internal;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -14,8 +14,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import java.util.List;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;

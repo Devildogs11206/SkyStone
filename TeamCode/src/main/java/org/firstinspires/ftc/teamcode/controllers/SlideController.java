@@ -1,6 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.controllers;
 
-public class SlideController extends RobotController{
+import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+
+public class SlideController extends RobotController {
     double power = 0.5;
 
     public SlideController(OpMode opMode) {
