@@ -1,6 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.controllers;
 
-public class ClawController extends RobotController{
+import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+
+public class ClawController extends RobotController {
     public ClawController(OpMode opMode) {
         super(opMode);
     }

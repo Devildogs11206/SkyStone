@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.controllers;
+
+import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 public class TiltController extends RobotController {
     public TiltController(OpMode opMode) {

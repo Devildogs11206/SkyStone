@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+
 @Autonomous
-public class aBlue2DriveUnderBridge extends OpMode {
+public class Red1DriveUnderBridgeOpMode extends OpMode {
     @Override
     protected void execute() {
         robot.drive(.5 ,0,8);

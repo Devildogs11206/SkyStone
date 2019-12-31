@@ -1,9 +1,13 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.internal.Robot;
+import org.firstinspires.ftc.teamcode.controllers.RobotController;
+
 public abstract class OpMode extends LinearOpMode {
-    protected Robot robot;
+    public Robot robot;
+
     private RobotController[] robotControllers;
 
     @Override

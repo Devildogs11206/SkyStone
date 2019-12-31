@@ -1,6 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.controllers;
 
-public class DriveController extends RobotController{
+import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+
+public class DriveController extends RobotController {
     private static final double POWER_LOW = 0.5;
     private static final double POWER_HIGH = 1.0;
 
