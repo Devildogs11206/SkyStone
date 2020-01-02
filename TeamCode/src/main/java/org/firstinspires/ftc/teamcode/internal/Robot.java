@@ -135,15 +135,20 @@ public class Robot {
         right_rear.setPower(right);
     }
 
-    public void drive(double drive, double turn, double inches) {
+    public void drive(double drive, double heading, double inches) {
+        turn(drive, heading);
         resetEncoders();
 
         int targetPosition = (int)(inches * TICKS_PER_INCH);
         int position = 0;
 
-        drive(drive, turn);
+        double remainder, turn;
 
         while (opMode.isContinuing() && targetPosition - position > 0) {
+            remainder = getRemainderLeftToTurn(heading);
+            turn = remainder / 50;
+            drive(drive, turn);
+
             position = (
                 Math.abs(left_front.getCurrentPosition()) +
                 Math.abs(left_rear.getCurrentPosition()) +
@@ -157,10 +162,26 @@ public class Robot {
         this.drive(0,0);
     }
 
-    public void turn(double degrees, double power) {
-        double turn = degrees / Math.abs(degrees) * power;
-        double inches = Math.abs(degrees * INCHES_PER_DEGREE);
-        drive(0, turn, inches);
+    public void turn(double drive, double heading) {
+        double remainder, turn;
+
+        do {
+            opMode.yield();
+            remainder = getRemainderLeftToTurn(heading);
+            turn = remainder / Math.abs(remainder) * drive;
+            drive(0, turn);
+        } while (opMode.isActive() && (remainder < -1 || remainder > 1));
+
+        drive(0,0);
+    }
+
+    private double getRemainderLeftToTurn(double heading) {
+        double remainder;
+        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        remainder = orientation.firstAngle - heading;
+        if (remainder > 180) remainder -= 360;
+        if (remainder < -180) remainder += 360;
+        return remainder;
     }
 
     public void slide(double power) {
