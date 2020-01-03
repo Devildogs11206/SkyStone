@@ -29,6 +29,8 @@ public class Robot {
 
     private OpMode opMode;
 
+    private BNO055IMU imu;
+
     private DcMotor left_front;
     private DcMotor left_rear;
     private DcMotor right_front;
@@ -46,8 +48,6 @@ public class Robot {
     public WebcamName webcamName;
     public int cameraMonitorViewId;
     public int tfodMonitorViewId;
-
-    BNO055IMU imu;
 
     public Position position = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
     public Orientation orientation = new Orientation();
@@ -71,7 +71,6 @@ public class Robot {
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-
 
         left_front = hardwareMap.get(DcMotor.class, "left_front");
         left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -175,15 +174,6 @@ public class Robot {
         drive(0,0);
     }
 
-    private double getRemainderLeftToTurn(double heading) {
-        double remainder;
-        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        remainder = orientation.firstAngle - heading;
-        if (remainder > 180) remainder -= 360;
-        if (remainder < -180) remainder += 360;
-        return remainder;
-    }
-
     public void slide(double power) {
         // If the digital channel returns true it's HIGH and the button is unpressed, so we are going to ...
         boolean limitFront = !slide_limit_front.getState();
@@ -264,9 +254,7 @@ public class Robot {
         telemetry.addData("Target", visionThread.targetVisible);
         telemetry.addData("Position (in)", position);
 
-
         if (recognitions != null) {
-
             telemetry.addData("Recognitions", recognitions.size());
 
             for (Recognition recognition : recognitions) {
@@ -276,7 +264,6 @@ public class Robot {
                 telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
             }
         }
-
     }
 
     private void resetEncoders() {
@@ -288,6 +275,15 @@ public class Robot {
         right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    private double getRemainderLeftToTurn(double heading) {
+        double remainder;
+        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        remainder = orientation.firstAngle - heading;
+        if (remainder > 180) remainder -= 360;
+        if (remainder < -180) remainder += 360;
+        return remainder;
     }
 
     private void sleep(double seconds) {
