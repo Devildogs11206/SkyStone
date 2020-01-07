@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 @Autonomous
-public class Blue1DriveUnderBridgeOpMode extends OpMode {
+public class Blue1Bridge extends OpMode {
     @Override
     protected void execute() {
         robot.drive(.5 ,0,8);

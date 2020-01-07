@@ -174,19 +174,41 @@ public class Robot {
             slide.setPower(power);
         }
     }
-
+/*
     public void slide(double power, double seconds) {
         slide(power);
         sleep(seconds);
         slide(0);
+    }
+*/
+
+    public void slide(double power, int position){
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        slide.setTargetPosition(position);
+        slide.setPower(power);
+
+        while(opMode.isContinuing() && slide.isBusy()) {
+            opMode.yield();
+        }
+    }
+
+    public static class SlidePosition{
+        public static final int BACK = 0;
+        public static final int FORWARD = 3000;
     }
 
     public void tilt(double power) {
         tilt.setPower(power);
     }
 
+    public static class TiltPosition{
+        public static final int BACK = 0;
+        public static final int TILTED = 1500;
+        public static final int UP = 3000;
+    }
+
     public void tilt(double power, int position){
-        tilt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         tilt.setTargetPosition(position);
@@ -196,13 +218,13 @@ public class Robot {
             opMode.yield();
         }
     }
-
+/*
     public void tilt(double power, double seconds) {
         tilt(power);
         sleep(seconds);
         tilt(0);
     }
-
+*/
     public void lift(double power){
         int minPos = 0;
         int maxPos = 8000;
@@ -214,6 +236,24 @@ public class Robot {
         } else {
             lift.setPower(0);
         }
+    }
+
+    public void lift(double power, int position){
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        lift.setTargetPosition(position);
+        lift.setPower(power);
+
+        while(opMode.isContinuing() && lift.isBusy()) {
+            opMode.yield();
+        }
+    }
+
+    public static class LiftPosition{
+        public static final int DOWN = 0;
+        public static final int LVL_ONE = 1000;
+        public static final int LVL_TWO = 2000;
+        public static final int LVL_THREE = 3000;
     }
 
     public void openClaw() {
