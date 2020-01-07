@@ -14,13 +14,13 @@ public class Red1Skystone extends OpMode {
     protected void execute() {
 
         robot.slide(0.5,FORWARD);
-        robot.tilt(0.5,UP);
+        robot.tilt(UP);
         robot.openClaw();
 
         robot.drive(0.5,0,32);
 
         robot.closeClaw();
-        robot.tilt(-0.5,BACK);
+        robot.tilt(BACK);
 
         robot.drive(-0.5,0,24);
 

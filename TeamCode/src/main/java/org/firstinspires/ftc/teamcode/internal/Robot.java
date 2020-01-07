@@ -208,16 +208,24 @@ public class Robot {
         public static final int UP = 3000;
     }
 
-    public void tilt(double power, int position){
+    public void tilt(int position){
         tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         tilt.setTargetPosition(position);
-        tilt.setPower(power);
+        tilt.setPower(0.5);
 
         while(opMode.isContinuing() && tilt.isBusy()) {
             opMode.yield();
         }
     }
+
+    public static class TiltAccel{
+        public static final double BACK = 10;
+        public static final double TILTED = 9;
+        public static final double UP = 0.5;
+    }
+
+    public void tiltAccel(double accel){}
 /*
     public void tilt(double power, double seconds) {
         tilt(power);
