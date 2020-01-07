@@ -1,0 +1,127 @@
+diff --git a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1DriveUnderBridgeOpMode.java b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1DriveUnderBridgeOpMode.java
+index 6ad2f7d..586ea4f 100644
+--- a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1DriveUnderBridgeOpMode.java
++++ b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1DriveUnderBridgeOpMode.java
+@@ -9,7 +9,6 @@ public class Blue1DriveUnderBridgeOpMode extends OpMode {
+     @Override
+     protected void execute() {
+         robot.drive(.5 ,0,8);
+-        robot.turn(-90,.5);
+-        robot.drive(.5,0,34);
++        robot.drive(.5,90,34);
+     }
+ }
+diff --git a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1PickUpSkystoneOpMode.java b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1PickUpSkystoneOpMode.java
+index a730a99..c143316 100644
+--- a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1PickUpSkystoneOpMode.java
++++ b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue1PickUpSkystoneOpMode.java
+@@ -8,9 +8,14 @@ import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+ public class Blue1PickUpSkystoneOpMode extends OpMode {
+     @Override
+     protected void execute() {
+-        //robot.slide(0.5,1);
+-        robot.tilt(0.5,1.25);
+-        robot.openClaw();
++
++        new Thread(){
++            @Override public void run(){
++                robot.slide(0.5,1);
++                robot.tilt(0.5,1.25);
++                robot.openClaw();
++            }
++        }.start();
+ 
+         robot.drive(0.5,0,32);
+ 
+@@ -19,11 +24,9 @@ public class Blue1PickUpSkystoneOpMode extends OpMode {
+ 
+         robot.drive(-0.5,0,24);
+ 
+-        robot.turn(-90,0.5);
+-        robot.drive(0.5,0,64);
++        robot.drive(0.5,90,64);
+         robot.openClaw();
+ 
+-        robot.turn(180,0.5);
+-        robot.drive(0.5,0,32);
++        robot.drive(-0.5,90,32);
+     }
+ }
+diff --git a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue2DriveUnderBridgeOpMode.java b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue2DriveUnderBridgeOpMode.java
+index 529d9a2..fb2e3c0 100644
+--- a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue2DriveUnderBridgeOpMode.java
++++ b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Blue2DriveUnderBridgeOpMode.java
+@@ -9,7 +9,6 @@ public class Blue2DriveUnderBridgeOpMode extends OpMode {
+     @Override
+     protected void execute() {
+         robot.drive(.5 ,0,8);
+-        robot.turn(90,.5);
+-        robot.drive(.5,0,34);
++        robot.drive(.5,-90,34);
+     }
+ }
+diff --git a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1DriveUnderBridgeOpMode.java b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1DriveUnderBridgeOpMode.java
+index b190c88..ccb1ad7 100644
+--- a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1DriveUnderBridgeOpMode.java
++++ b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1DriveUnderBridgeOpMode.java
+@@ -9,7 +9,6 @@ public class Red1DriveUnderBridgeOpMode extends OpMode {
+     @Override
+     protected void execute() {
+         robot.drive(.5 ,0,8);
+-        robot.turn(90,.5);
+-        robot.drive(.5,0,34);
++        robot.drive(.5,-90,34);
+     }
+ }
+diff --git a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1PickUpSkystoneOpMode.java b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1PickUpSkystoneOpMode.java
+index c27d9ec..23516ee 100644
+--- a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1PickUpSkystoneOpMode.java
++++ b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red1PickUpSkystoneOpMode.java
+@@ -8,23 +8,25 @@ import org.firstinspires.ftc.teamcode.opmodes.OpMode;
+ public class Red1PickUpSkystoneOpMode extends OpMode {
+     @Override
+     protected void execute() {
+-        robot.slide(0.5,1);
+-        robot.tilt(0.5,1.25);
+-        robot.openClaw();
++
++        new Thread(){
++            @Override public void run(){
++                robot.slide(0.5,1);
++                robot.tilt(0.5,1.25);
++                robot.openClaw();
++            }
++        }.start();
+ 
+         robot.drive(0.5,0,32);
+ 
+         robot.closeClaw();
+         robot.tilt(-0.5,1.3);
+-        robot.turn(180,0.5);
+ 
+-        robot.drive(0.5,0,24);
++        robot.drive(-0.5,0,24);
+ 
+-        robot.turn(-90,0.5);
+-        robot.drive(0.5,0,64);
++        robot.drive(0.5,-90,64);
+         robot.openClaw();
+ 
+-        robot.turn(180,0.5);
+-        robot.drive(0.5,0,32);
++        robot.drive(-0.5,-90,32);
+     }
+ }
+diff --git a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red2DriveUnderBridgeOpMode.java b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red2DriveUnderBridgeOpMode.java
+index 5d9929b..9093ad2 100644
+--- a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red2DriveUnderBridgeOpMode.java
++++ b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmodes/Red2DriveUnderBridgeOpMode.java
+@@ -9,7 +9,6 @@ public class Red2DriveUnderBridgeOpMode extends OpMode {
+     @Override
+     protected void execute() {
+         robot.drive(.5 ,0,8);
+-        robot.turn(-90,.5);
+-        robot.drive(.5,0,34);
++        robot.drive(.5,90,34);
+     }
+ }

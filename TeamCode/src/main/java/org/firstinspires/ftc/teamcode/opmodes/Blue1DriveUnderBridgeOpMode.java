@@ -9,7 +9,6 @@ public class Blue1DriveUnderBridgeOpMode extends OpMode {
     @Override
     protected void execute() {
         robot.drive(.5 ,0,8);
-        robot.turn(-90,.5);
-        robot.drive(.5,0,34);
+        robot.drive(.5,90,34);
     }
 }
