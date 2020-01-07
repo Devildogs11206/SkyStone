@@ -41,6 +41,7 @@ public class Robot {
 
     private Servo claw_left;
     private Servo claw_right;
+    private Servo stick;
 
     private DigitalChannel slide_limit_front;
     private DigitalChannel slide_limit_rear;
@@ -102,6 +103,7 @@ public class Robot {
 
         claw_left = hardwareMap.get(Servo.class, "claw_left");
         claw_right = hardwareMap.get(Servo.class, "claw_right");
+        stick = hardwareMap.get(Servo.class, "stick");
 
         slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
         slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
@@ -224,6 +226,14 @@ public class Robot {
             lift.setPower(power);
         } else {
             lift.setPower(0);
+        }
+    }
+
+    public void stickToggle(){
+        if (stick.getPosition() > 0.5) {
+            stick.setPosition(0);
+        } else {
+            stick.setPosition(1);
         }
     }
 
