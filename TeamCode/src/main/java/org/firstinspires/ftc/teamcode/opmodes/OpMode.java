@@ -23,9 +23,7 @@ public abstract class OpMode extends LinearOpMode {
     }
 
     public boolean isContinuing() {
-        return isActive() &&
-            (!gamepad1.left_stick_button || !gamepad1.right_stick_button) &&
-            (!gamepad2.left_stick_button || !gamepad2.right_stick_button);
+        return isActive() && !gamepad1.back && !gamepad2. back;
     }
 
     public void yield() {
