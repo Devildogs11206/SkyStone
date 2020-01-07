@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.internal;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cCompassSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -21,6 +22,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.IN;
+import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
 
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;
@@ -35,16 +38,21 @@ public class Robot {
     private DcMotor left_rear;
     private DcMotor right_front;
     private DcMotor right_rear;
+
     private DcMotor slide;
+    private DigitalChannel slide_limit_front;
+    private DigitalChannel slide_limit_rear;
+
     private DcMotor lift;
+
     private DcMotor tilt;
+    private ModernRoboticsI2cCompassSensor tilt_accelerometer;
 
     private Servo claw_left;
     private Servo claw_right;
+
     private Servo stick;
 
-    private DigitalChannel slide_limit_front;
-    private DigitalChannel slide_limit_rear;
 
     public WebcamName webcamName;
     public int cameraMonitorViewId;
@@ -100,6 +108,7 @@ public class Robot {
 
         tilt = hardwareMap.get(DcMotor.class, "tilt");
         tilt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        tilt_accelerometer = hardwareMap.get(ModernRoboticsI2cCompassSensor.class, "tilt_accelerometer");
 
         claw_left = hardwareMap.get(Servo.class, "claw_left");
         claw_right = hardwareMap.get(Servo.class, "claw_right");
@@ -176,22 +185,26 @@ public class Robot {
         drive(0,0);
     }
 
-    public void slide(double power) {
-        // If the digital channel returns true it's HIGH and the button is unpressed, so we are going to ...
-        boolean limitFront = !slide_limit_front.getState();
-        boolean limitRear = !slide_limit_rear.getState();
-
-        if ((power > 0 && limitRear) || (power < 0 && limitFront)) {
-            slide.setPower(0);
-        } else {
-            slide.setPower(power);
-        }
+    public enum SlidePosition{
+        IN, OUT
     }
 
-    public void slide(double power, double seconds) {
-        slide(power);
-        sleep(seconds);
-        slide(0);
+    public void slide(SlidePosition position) {
+        if (position == OUT){
+            while(opMode.isActive() && slide_limit_rear.getState()) {
+                slide.setPower(0.5);
+                opMode.yield();
+            }
+        }
+
+        if (position == IN){
+            while(opMode.isActive() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > 9) {
+                slide.setPower(-0.5);
+                opMode.yield();
+            }
+        }
+
+        slide.setPower(0);
     }
 
     public void tilt(double power) {

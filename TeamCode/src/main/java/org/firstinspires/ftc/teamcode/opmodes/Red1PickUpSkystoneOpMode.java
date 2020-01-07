@@ -4,11 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
+import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
+
 @Autonomous
 public class Red1PickUpSkystoneOpMode extends OpMode {
     @Override
     protected void execute() {
-        robot.slide(0.5,1);
+        robot.slide(OUT);
         robot.tilt(0.5,1.25);
         robot.openClaw();
 
