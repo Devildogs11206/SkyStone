@@ -6,15 +6,27 @@ import org.firstinspires.ftc.teamcode.internal.Robot;
 import org.firstinspires.ftc.teamcode.controllers.RobotController;
 
 public abstract class OpMode extends LinearOpMode {
+    private boolean calibrate = false;
+
     public Robot robot;
 
     private RobotController[] robotControllers;
+
+    public OpMode() {
+        this(true);
+    }
+
+    public OpMode(boolean calibrate) {
+        this.calibrate = calibrate;
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this);
         robot.init();
+        if (calibrate) robot.calibrate();
         waitForStart();
+        robot.start();
         execute();
     }
 
@@ -23,7 +35,7 @@ public abstract class OpMode extends LinearOpMode {
     }
 
     public boolean isContinuing() {
-        return isActive() && !gamepad1.back && !gamepad2. back;
+        return !isStopRequested() && !gamepad1.back && !gamepad2.back;
     }
 
     public void yield() {

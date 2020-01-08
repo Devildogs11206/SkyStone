@@ -22,13 +22,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
+import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.IN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
 
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;
     private static final double TICKS_PER_INCH = 1120 / INCHES_PER_ROTATION;
-    private static final double INCHES_PER_DEGREE = INCHES_PER_ROTATION / 120;
 
     private OpMode opMode;
 
@@ -43,16 +44,18 @@ public class Robot {
     private DigitalChannel slide_limit_front;
     private DigitalChannel slide_limit_rear;
 
-    private DcMotor lift;
-
     private DcMotor tilt;
+    private DigitalChannel tilt_limit;
     private ModernRoboticsI2cCompassSensor tilt_accelerometer;
+
+    private DcMotor lift;
 
     private Servo claw_left;
     private Servo claw_right;
 
     private Servo stick;
 
+    private VisionThread visionThread;
 
     public WebcamName webcamName;
     public int cameraMonitorViewId;
@@ -62,8 +65,6 @@ public class Robot {
     public Orientation orientation = new Orientation();
     public List<Recognition> recognitions = null;
 
-    private VisionThread visionThread;
-
     public Robot(OpMode opMode) {
         this.opMode = opMode;
     }
@@ -72,53 +73,58 @@ public class Robot {
         HardwareMap hardwareMap = opMode.hardwareMap;
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit            = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile  = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled       = true;
-        parameters.loggingTag           = "IMU";
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
         left_front = hardwareMap.get(DcMotor.class, "left_front");
+        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         left_front.setDirection(DcMotor.Direction.FORWARD);
-
         left_rear = hardwareMap.get(DcMotor.class,"left_rear");
+        left_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         left_rear.setDirection(DcMotor.Direction.FORWARD);
-
         right_front = hardwareMap.get(DcMotor.class,"right_front");
+        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_front.setDirection(DcMotor.Direction.REVERSE);
-
         right_rear = hardwareMap.get(DcMotor.class, "right_rear");
+        right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_rear.setDirection(DcMotor.Direction.REVERSE);
 
         slide = hardwareMap.get(DcMotor.class,"slide");
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setDirection(DcMotor.Direction.REVERSE);
-
-        lift = hardwareMap.get(DcMotor.class, "lift");
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lift.setDirection(DcMotor.Direction.REVERSE);
+        slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
+        slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
+        slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
+        slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
 
         tilt = hardwareMap.get(DcMotor.class, "tilt");
+        tilt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         tilt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        tilt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        tilt_limit = hardwareMap.get(DigitalChannel.class, "tilt_limit");
         tilt_accelerometer = hardwareMap.get(ModernRoboticsI2cCompassSensor.class, "tilt_accelerometer");
+
+        lift = hardwareMap.get(DcMotor.class, "lift");
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setDirection(DcMotor.Direction.REVERSE);
 
         claw_left = hardwareMap.get(Servo.class, "claw_left");
         claw_right = hardwareMap.get(Servo.class, "claw_right");
+
         stick = hardwareMap.get(Servo.class, "stick");
-
-        slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
-        slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
-
-        slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
-        slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
 
         webcamName = hardwareMap.get(WebcamName.class,"Webcam 1");
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -126,6 +132,14 @@ public class Robot {
 
         visionThread = new VisionThread(opMode,this);
         visionThread.start();
+    }
+
+    public void calibrate() {
+        slide(IN);
+    }
+
+    public void start() {
+        slide(OUT);
     }
 
     public void drive(double drive, double turn) {
@@ -185,21 +199,21 @@ public class Robot {
         drive(0,0);
     }
 
-    public enum SlidePosition{
-        IN, OUT
-    }
+    public enum SlidePosition{ IN, OUT }
 
     public void slide(SlidePosition position) {
-        if (position == OUT){
+        final double power = 0.5;
+
+        if (position == OUT) {
             while(opMode.isActive() && slide_limit_rear.getState()) {
-                slide.setPower(0.5);
+                slide.setPower(power);
                 opMode.yield();
             }
         }
 
-        if (position == IN){
+        if (position == IN) {
             while(opMode.isActive() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > 9) {
-                slide.setPower(-0.5);
+                slide.setPower(-power);
                 opMode.yield();
             }
         }
@@ -211,27 +225,35 @@ public class Robot {
         tilt.setPower(power);
     }
 
-    public void tilt(double power, int position){
-        tilt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    public static class TiltPosition {
+        public static final int BACK = 0;
+        public static final int TILTED = 1000;
+        public static final int UP = 3000;
+    }
 
+    public void tilt(int position) {
         tilt.setTargetPosition(position);
-        tilt.setPower(power);
+        tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        tilt.setPower(0.5);
 
         while(opMode.isContinuing() && tilt.isBusy()) {
             opMode.yield();
         }
     }
 
-    public void tilt(double power, double seconds) {
-        tilt(power);
-        sleep(seconds);
-        tilt(0);
+    public static class TiltAccel {
+        public static final double BACK = 10;
+        public static final double TILTED = 9;
+        public static final double UP = 0.5;
     }
 
-    public void lift(double power){
+    public void tiltAccel(double accel) {
+
+    }
+
+    public void lift(double power) {
         int minPos = 0;
-        int maxPos = 8000;
+        int maxPos = 10000;
 
         int position = lift.getCurrentPosition();
 
@@ -244,26 +266,24 @@ public class Robot {
 
     public void stickToggle(){
         if (stick.getPosition() > 0.5) {
-            stick.setPosition(0);
+            stick.setPosition(0.25);
         } else {
-            stick.setPosition(1);
+            stick.setPosition(0.75);
         }
     }
 
-    public void openClaw() {
-        claw_left.setPosition(1);
-        claw_right.setPosition(0.25);
-        sleep(0.25);
-    }
+    public enum ClawPosition { OPEN, CLOSE }
 
-    public void closeClaw() {
-        claw_left.setPosition(0.15);
-        claw_right.setPosition(0.85);
+    public void claw(ClawPosition position) {
+        claw_left.setPosition(position == OPEN ? 1 : 0.15);
+        claw_right.setPosition(position == CLOSE ? 0.25 : 0.85);
         sleep(0.25);
     }
 
     public void addTelemetry(){
         Telemetry telemetry = opMode.telemetry;
+
+        orientation = getOrientation();
 
         telemetry.addData("Drive (LF)","%.2f Pow, %d Pos", left_front.getPower(), left_front.getCurrentPosition());
         telemetry.addData("Drive (LR)","%.2f Pow, %d Pos", left_rear.getPower(), left_rear.getCurrentPosition());
@@ -271,8 +291,9 @@ public class Robot {
         telemetry.addData("Drive (RR)","%.2f Pow, %d Pos", right_rear.getPower(), right_rear.getCurrentPosition());
         telemetry.addData("Slide","%.2f Pow, %d Pos", slide.getPower(), slide.getCurrentPosition());
         telemetry.addData("Tilt","%.2f Pow, %d Pos", tilt.getPower(), tilt.getCurrentPosition());
+        telemetry.addData("Tilt Limit", tilt_limit.getState());
+        telemetry.addData("Tilt Accelerometer", tilt_accelerometer.getAcceleration());
         telemetry.addData("Lift","%.2f Pow, %d Pos", lift.getPower(), lift.getCurrentPosition());
-        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("Orientation", orientation);
         telemetry.addData("Target", visionThread.targetVisible);
         telemetry.addData("Position (in)", position);
@@ -281,8 +302,10 @@ public class Robot {
             telemetry.addData("Recognitions", recognitions.size());
 
             for (Recognition recognition : recognitions) {
+                telemetry.addData(" label", recognition.getLabel());
                 telemetry.addData("  left,top", "%.3f , %.3f", recognition.getLeft(), recognition.getTop());
                 telemetry.addData("  right,bottom", "%.3f , %.3f", recognition.getRight(), recognition.getBottom());
+                telemetry.addData("  height,width", "%.3f , %.3f", recognition.getBottom() - recognition.getTop(), recognition.getRight() - recognition.getLeft());
                 telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
                 telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
             }
@@ -302,16 +325,20 @@ public class Robot {
 
     private double getRemainderLeftToTurn(double heading) {
         double remainder;
-        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        orientation = getOrientation();
         remainder = orientation.firstAngle - heading;
         if (remainder > 180) remainder -= 360;
         if (remainder < -180) remainder += 360;
         return remainder;
     }
 
+    private Orientation getOrientation() {
+        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+    }
+
     private void sleep(double seconds) {
         try {
-            Thread.sleep((long)(1000*seconds));
+            Thread.sleep((long)(1000 * seconds));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

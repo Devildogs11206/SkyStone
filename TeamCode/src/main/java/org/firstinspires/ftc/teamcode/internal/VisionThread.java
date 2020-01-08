@@ -206,7 +206,6 @@ public class VisionThread extends Thread {
                     robot.recognitions = updatedRecognitions;
                 }
 
-
                 opMode.yield();
             }
 

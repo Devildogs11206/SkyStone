@@ -7,12 +7,16 @@ import org.firstinspires.ftc.teamcode.controllers.DriveController;
 import org.firstinspires.ftc.teamcode.controllers.LiftController;
 import org.firstinspires.ftc.teamcode.controllers.RobotController;
 import org.firstinspires.ftc.teamcode.controllers.SlideController;
+import org.firstinspires.ftc.teamcode.controllers.StickController;
 import org.firstinspires.ftc.teamcode.controllers.TiltController;
-import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 @TeleOp
 public class TeleOpMode extends OpMode {
     private RobotController[] robotControllers;
+
+    public TeleOpMode() {
+        super(false);
+    }
 
     @Override
     protected void execute() {
@@ -22,9 +26,10 @@ public class TeleOpMode extends OpMode {
             new ClawController(this),
             new SlideController(this),
             new TiltController(this),
+            new StickController(this)
         };
 
-        while (opModeIsActive()) {
+        while (isActive()) {
             for (RobotController controller : robotControllers) {
                 controller.execute();
             }
