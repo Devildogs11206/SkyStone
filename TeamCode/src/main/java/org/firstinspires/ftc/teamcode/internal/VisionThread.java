@@ -205,8 +205,6 @@ public class VisionThread extends Thread {
                 if (updatedRecognitions != null) {
                     robot.recognitions = updatedRecognitions;
                 }
-
-                opMode.yield();
             }
 
             targetsSkyStone.deactivate();

@@ -31,14 +31,16 @@ public abstract class OpMode extends LinearOpMode {
     }
 
     public boolean isActive() {
+        yield();
         return opModeIsActive();
     }
 
     public boolean isContinuing() {
+        yield();
         return !isStopRequested() && !gamepad1.back && !gamepad2.back;
     }
 
-    public void yield() {
+    private void yield() {
         sleep(50);
     }
 

@@ -179,8 +179,6 @@ public class Robot {
                 Math.abs(right_front.getCurrentPosition()) +
                 Math.abs(right_rear.getCurrentPosition())
             ) / 4;
-
-            opMode.yield();
         }
 
         this.drive(0,0);
@@ -190,11 +188,10 @@ public class Robot {
         double remainder, turn;
 
         do {
-            opMode.yield();
             remainder = getRemainderLeftToTurn(heading);
             turn = remainder / Math.abs(remainder) * drive;
             drive(0, turn);
-        } while (opMode.isActive() && (remainder < -1 || remainder > 1));
+        } while ((remainder < -1 || remainder > 1) && opMode.isActive());
 
         drive(0,0);
     }
@@ -205,16 +202,14 @@ public class Robot {
         final double power = 0.5;
 
         if (position == OUT) {
-            while(opMode.isActive() && slide_limit_rear.getState()) {
+            while(opMode.isContinuing() && slide_limit_rear.getState()) {
                 slide.setPower(power);
-                opMode.yield();
             }
         }
 
         if (position == IN) {
-            while(opMode.isActive() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > 9) {
+            while(opMode.isContinuing() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > 9) {
                 slide.setPower(-power);
-                opMode.yield();
             }
         }
 
@@ -236,9 +231,7 @@ public class Robot {
         tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         tilt.setPower(0.5);
 
-        while(opMode.isContinuing() && tilt.isBusy()) {
-            opMode.yield();
-        }
+        while(tilt.isBusy() && opMode.isContinuing());
     }
 
     public static class TiltAccel {
