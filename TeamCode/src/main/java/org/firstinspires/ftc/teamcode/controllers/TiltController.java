@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.controllers;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import static org.firstinspires.ftc.teamcode.internal.Robot.LiftPosition.DOWN;
@@ -13,7 +15,14 @@ public class TiltController extends RobotController {
 
     @Override
     public void execute() {
-        if (gamepad2.left_trigger > 0) robot.tilt(gamepad2.left_trigger);
+        if (gamepad2.left_trigger > 0) {
+            robot.tilt(gamepad2.left_trigger);
+            robot.setLights(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+        }
+        if (gamepad2.left_trigger < 0) {
+            robot.tilt(gamepad2.left_trigger);
+            robot.setLights(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+        }
         else if (gamepad2.right_trigger > 0) robot.tilt(-gamepad2.right_trigger);
 
         else if(gamepad2.right_stick_button && gamepad2.y){robot.tilt(UP);}

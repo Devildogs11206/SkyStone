@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.internal;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -20,6 +21,8 @@ import java.util.List;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.BLACK;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.YELLOW;
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 
 public class Robot {
@@ -39,6 +42,8 @@ public class Robot {
 
     private Servo claw_left;
     private Servo claw_right;
+
+    private RevBlinkinLedDriver lights;
 
     private DigitalChannel slide_limit_front;
     private DigitalChannel slide_limit_rear;
@@ -103,6 +108,8 @@ public class Robot {
 
         claw_left = hardwareMap.get(Servo.class, "claw_left");
         claw_right = hardwareMap.get(Servo.class, "claw_right");
+
+        lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
 
         slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
         slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
@@ -276,6 +283,10 @@ public class Robot {
         sleep(0.25);
     }
 
+    public void setLights (RevBlinkinLedDriver.BlinkinPattern pattern){
+            lights.setPattern(pattern);
+    }
+
     public void addTelemetry(){
         Telemetry telemetry = opMode.telemetry;
 
@@ -301,6 +312,8 @@ public class Robot {
                 telemetry.addData("  right,bottom", "%.3f , %.3f", recognition.getRight(), recognition.getBottom());
                 telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
                 telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
+
+                setLights(recognition.getLabel().contains("Stone") ? YELLOW : BLACK);
             }
         }
 
