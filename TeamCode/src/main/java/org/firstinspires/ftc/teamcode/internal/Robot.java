@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.internal;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cCompassSensor;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -21,6 +22,8 @@ import java.util.List;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.BLACK;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.YELLOW;
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
@@ -54,6 +57,8 @@ public class Robot {
     private Servo claw_right;
 
     private Servo stick;
+
+    private RevBlinkinLedDriver lights;
 
     private VisionThread visionThread;
 
@@ -125,6 +130,8 @@ public class Robot {
         claw_right = hardwareMap.get(Servo.class, "claw_right");
 
         stick = hardwareMap.get(Servo.class, "stick");
+
+        lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
 
         webcamName = hardwareMap.get(WebcamName.class,"Webcam 1");
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -273,6 +280,10 @@ public class Robot {
         sleep(0.25);
     }
 
+    public void setLights (RevBlinkinLedDriver.BlinkinPattern pattern){
+            lights.setPattern(pattern);
+    }
+
     public void addTelemetry(){
         Telemetry telemetry = opMode.telemetry;
 
@@ -301,6 +312,8 @@ public class Robot {
                 telemetry.addData("  height,width", "%.3f , %.3f", recognition.getBottom() - recognition.getTop(), recognition.getRight() - recognition.getLeft());
                 telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
                 telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
+
+                setLights(recognition.getLabel().contains("Stone") ? YELLOW : BLACK);
             }
         }
     }
