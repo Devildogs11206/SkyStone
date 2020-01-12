@@ -106,6 +106,7 @@ public class Robot {
 
         slide = hardwareMap.get(DcMotor.class,"slide");
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setDirection(DcMotor.Direction.REVERSE);
         slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
@@ -149,9 +150,9 @@ public class Robot {
         slide(OUT);
     }
 
-    public void drive(double drive, double turn) {
-        double left = drive + turn;
-        double right = drive - turn;
+    public void drive(double power, double turn) {
+        double left = power + turn;
+        double right = power - turn;
 
         double max = Math.max(Math.abs(left), Math.abs(right));
 
@@ -166,8 +167,8 @@ public class Robot {
         right_rear.setPower(right);
     }
 
-    public void drive(double drive, double heading, double inches) {
-        turn(drive, heading);
+    public void drive(double power, double heading, double inches) {
+        turn(power, heading);
         resetEncoders();
 
         int targetPosition = (int)(inches * TICKS_PER_INCH);
@@ -178,7 +179,7 @@ public class Robot {
         while (opMode.isContinuing() && targetPosition - position > 0) {
             remainder = getRemainderLeftToTurn(heading);
             turn = remainder / 50;
-            drive(drive, turn);
+            drive(power, turn);
 
             position = (
                 Math.abs(left_front.getCurrentPosition()) +
@@ -224,6 +225,7 @@ public class Robot {
     }
 
     public void tilt(double power) {
+        tilt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         tilt.setPower(power);
     }
 
@@ -266,9 +268,9 @@ public class Robot {
 
     public void stickToggle(){
         if (stick.getPosition() > 0.5) {
-            stick.setPosition(0.25);
+            stick.setPosition(0.0);
         } else {
-            stick.setPosition(0.75);
+            stick.setPosition(1.0);
         }
     }
 
@@ -276,7 +278,7 @@ public class Robot {
 
     public void claw(ClawPosition position) {
         claw_left.setPosition(position == OPEN ? 1 : 0.15);
-        claw_right.setPosition(position == CLOSE ? 0.25 : 0.85);
+        claw_right.setPosition(position == CLOSE ? 0.85 : 0.25 );
         sleep(0.25);
     }
 
