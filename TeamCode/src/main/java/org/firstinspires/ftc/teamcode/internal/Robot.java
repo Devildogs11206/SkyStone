@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -264,7 +265,15 @@ public class Robot {
     }
 
     public void tiltAccel(double accel) {
+        while (opMode.isContinuing()) {
+            Acceleration acceleration = tilt_accelerometer.getAcceleration();
+            double remainder = acceleration.yAccel - accel;
+            double power = remainder / 10;
+            if(remainder > -0.1 && remainder < 0.1) break;
+            tilt.setPower(power);
+        }
 
+        tilt.setPower(0);
     }
 
     public void lift(double power) {
