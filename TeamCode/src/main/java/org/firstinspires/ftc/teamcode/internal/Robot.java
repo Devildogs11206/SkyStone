@@ -161,6 +161,20 @@ public class Robot {
             right /= max;
         }
 
+        double maxChange = 0.2;
+        
+        double leftCurent = left_front.getPower();
+        double leftChange = left - leftCurent;
+        if (leftChange > maxChange) leftChange = maxChange;
+        if (leftChange < -maxChange) leftChange = -maxChange;
+        left = leftCurent + leftChange;
+
+        double rightCurent = right_front.getPower();
+        double rightChange = right - rightCurent;
+        if (rightChange > maxChange) rightChange = maxChange;
+        if (rightChange < -maxChange) rightChange = -maxChange;
+        right = rightCurent + rightChange;
+
         left_front.setPower(left);
         left_rear.setPower(left);
         right_front.setPower(right);
