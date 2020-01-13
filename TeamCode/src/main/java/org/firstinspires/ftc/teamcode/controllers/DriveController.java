@@ -14,8 +14,8 @@ public class DriveController extends RobotController {
 
     @Override
     public void execute() {
-        if (gamepad1.x) power = POWER_LOW;
-        if (gamepad1.y) power = POWER_HIGH;
+        //if (gamepad1.x) power = POWER_LOW;
+        //if (gamepad1.y) power = POWER_HIGH;
 
         double drive = -gamepad1.left_stick_y;
         double turn = gamepad1.right_stick_x;

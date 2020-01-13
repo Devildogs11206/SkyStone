@@ -23,12 +23,16 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.BLACK;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.GREEN;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.YELLOW;
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.IN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.BACK;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.UP;
 
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;
@@ -210,13 +214,13 @@ public class Robot {
         final double power = 0.5;
 
         if (position == OUT) {
-            while(opMode.isContinuing() && slide_limit_rear.getState()) {
+            while (opMode.isContinuing() && slide_limit_rear.getState()) {
                 slide.setPower(power);
             }
         }
 
         if (position == IN) {
-            while(opMode.isContinuing() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > 9) {
+            while (opMode.isContinuing() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > 9) {
                 slide.setPower(-power);
             }
         }
@@ -283,7 +287,53 @@ public class Robot {
     }
 
     public void setLights (RevBlinkinLedDriver.BlinkinPattern pattern){
-            lights.setPattern(pattern);
+        lights.setPattern(pattern);
+    }
+
+    public Recognition findNearestStone(){
+        Recognition nearestRecognition = null;
+
+        for (Recognition recognition : recognitions) {
+
+
+            if(nearestRecognition == null || getArea(recognition) > getArea(nearestRecognition )){nearestRecognition = recognition;}
+
+        }
+        return nearestRecognition;
+    }
+
+    Boolean stonePickUp = false;
+
+    public void pickUpStone(){
+
+        stonePickUp = true;
+
+        setLights(LARSON_SCANNER_RED);
+
+        while(opMode.isContinuing()){
+
+            Recognition stone = findNearestStone();
+            if(stone == null){drive(0,0);continue;}
+
+            double amountToTurn = stone.estimateAngleToObject(DEGREES)/90;
+
+            drive(0.25,amountToTurn);
+
+            if(getArea(stone)>80000)break;
+        }
+
+        tilt(UP);
+        claw(OPEN);
+        drive(0.3,0,8);
+        claw(CLOSE);
+        tilt(BACK);
+
+        setLights(GREEN);
+        stonePickUp = false;
+    }
+
+    private double getArea(Recognition recognition){
+        return recognition.getWidth()*recognition.getHeight();
     }
 
     public void addTelemetry(){
@@ -303,6 +353,9 @@ public class Robot {
         telemetry.addData("Orientation", orientation);
         telemetry.addData("Target", visionThread.targetVisible);
         telemetry.addData("Position (in)", position);
+        telemetry.addData("PickUpStone running",stonePickUp);
+
+        Boolean stoneVisible = false;
 
         if (recognitions != null) {
             telemetry.addData("Recognitions", recognitions.size());
@@ -315,9 +368,13 @@ public class Robot {
                 telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
                 telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
 
-                setLights(recognition.getLabel().contains("Stone") ? YELLOW : BLACK);
+                if(recognition.getLabel().contains("tone")){stoneVisible = true;}
+
             }
         }
+
+        if(!stonePickUp){setLights(stoneVisible ? YELLOW : BLACK);}
+
     }
 
     private void resetEncoders() {

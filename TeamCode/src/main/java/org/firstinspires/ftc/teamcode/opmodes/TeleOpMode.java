@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.controllers.RobotController;
 import org.firstinspires.ftc.teamcode.controllers.SlideController;
 import org.firstinspires.ftc.teamcode.controllers.StickController;
 import org.firstinspires.ftc.teamcode.controllers.TiltController;
+import org.firstinspires.ftc.teamcode.internal.AssistController;
 
 @TeleOp
 public class TeleOpMode extends OpMode {
@@ -28,7 +29,8 @@ public class TeleOpMode extends OpMode {
             new SlideController(this),
             new TiltController(this),
             new StickController(this),
-            new LightsController(this)
+            new LightsController(this),
+            new AssistController(this)
         };
 
         while (isActive()) {

@@ -90,6 +90,9 @@ public class VisionThread extends Thread {
             VuforiaTrackable rear2 = targetsSkyStone.get(12);
             rear2.setName("Rear Perimeter 2");
 
+            //removed "Stone Target"
+            //targetsSkyStone.remove(0);
+
             // For convenience, gather together all the trackable objects in one easily-iterable collection */
             List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
             allTrackables.addAll(targetsSkyStone);
@@ -152,7 +155,7 @@ public class VisionThread extends Thread {
 
             OpenGLMatrix robotFromCamera = OpenGLMatrix
                     .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
-                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0));
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, -90, 0, -70));
 
             for (VuforiaTrackable trackable : allTrackables) {
                 ((VuforiaTrackableDefaultListener) trackable.getListener()).setCameraLocationOnRobot(robot.webcamName, robotFromCamera);
@@ -173,6 +176,7 @@ public class VisionThread extends Thread {
                 targetVisible = false;
 
                 for (VuforiaTrackable trackable : allTrackables) {
+                    if(trackable.getName() == "Stone Target")continue;
                     if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
                         targetVisible = true;
 
