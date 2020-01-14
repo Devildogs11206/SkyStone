@@ -26,14 +26,18 @@ import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.BLACK;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.GREEN;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.RAINBOW_LAVA_PALETTE;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.YELLOW;
+
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.IN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
-import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.BACK;
-import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.UP;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.TILTED;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.BACK;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.UP;
 
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;
@@ -148,10 +152,13 @@ public class Robot {
     }
 
     public void calibrate() {
+        setLights(RAINBOW_LAVA_PALETTE);
+        tilt(BACK);
         slide(IN);
     }
 
     public void start() {
+        setLights(BLACK);
         slide(OUT);
     }
 
@@ -166,19 +173,23 @@ public class Robot {
             right /= max;
         }
 
-        double maxChange = 0.2;
-        
-        double leftCurent = left_front.getPower();
-        double leftChange = left - leftCurent;
-        if (leftChange > maxChange) leftChange = maxChange;
-        if (leftChange < -maxChange) leftChange = -maxChange;
-        left = leftCurent + leftChange;
+        double maxChange = 0.25;
 
-        double rightCurent = right_front.getPower();
-        double rightChange = right - rightCurent;
-        if (rightChange > maxChange) rightChange = maxChange;
-        if (rightChange < -maxChange) rightChange = -maxChange;
-        right = rightCurent + rightChange;
+        if (left != 0) {
+            double leftCurent = left_front.getPower();
+            double leftChange = left - leftCurent;
+            if (leftChange > maxChange) leftChange = maxChange;
+            if (leftChange < -maxChange) leftChange = -maxChange;
+            left = leftCurent + leftChange;
+        }
+
+        if (right != 0) {
+            double rightCurent = right_front.getPower();
+            double rightChange = right - rightCurent;
+            if (rightChange > maxChange) rightChange = maxChange;
+            if (rightChange < -maxChange) rightChange = -maxChange;
+            right = rightCurent + rightChange;
+        }
 
         left_front.setPower(left);
         left_rear.setPower(left);
@@ -211,12 +222,12 @@ public class Robot {
         this.drive(0,0);
     }
 
-    public void turn(double drive, double heading) {
+    public void turn(double power, double heading) {
         double remainder, turn;
 
         do {
             remainder = getRemainderLeftToTurn(heading);
-            turn = remainder / Math.abs(remainder) * drive;
+            turn = remainder / Math.abs(remainder) * power;
             drive(0, turn);
         } while ((remainder < -1 || remainder > 1) && opMode.isActive());
 
@@ -251,7 +262,7 @@ public class Robot {
     public static class TiltPosition {
         public static final int BACK = 0;
         public static final int TILTED = 1000;
-        public static final int UP = 3000;
+        public static final int UP = 3400;
     }
 
     public void tilt(int position) {
@@ -263,8 +274,8 @@ public class Robot {
     }
 
     public static class TiltAccel {
-        public static final double BACK = 10;
-        public static final double TILTED = 9;
+        public static final double BACK = 9.8;
+        public static final double TILTED = 8.5;
         public static final double UP = 0.5;
     }
 
@@ -299,6 +310,8 @@ public class Robot {
         } else {
             stick.setPosition(1.0);
         }
+
+        sleep(0.25);
     }
 
     public enum ClawPosition { OPEN, CLOSE }
@@ -369,6 +382,8 @@ public class Robot {
         telemetry.addData("Drive (RF)","%.2f Pow, %d Pos", right_front.getPower(), right_front.getCurrentPosition());
         telemetry.addData("Drive (RR)","%.2f Pow, %d Pos", right_rear.getPower(), right_rear.getCurrentPosition());
         telemetry.addData("Slide","%.2f Pow, %d Pos", slide.getPower(), slide.getCurrentPosition());
+        telemetry.addData("Slide Limit Front", slide_limit_front.getState());
+        telemetry.addData("Slide Limit Rear", slide_limit_rear.getState());
         telemetry.addData("Tilt","%.2f Pow, %d Pos", tilt.getPower(), tilt.getCurrentPosition());
         telemetry.addData("Tilt Limit", tilt_limit.getState());
         telemetry.addData("Tilt Accelerometer", tilt_accelerometer.getAcceleration());
@@ -400,15 +415,8 @@ public class Robot {
 
     }
 
-    private void resetEncoders() {
-        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    private Orientation getOrientation() {
+        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     private double getRemainderLeftToTurn(double heading) {
@@ -420,8 +428,15 @@ public class Robot {
         return remainder;
     }
 
-    private Orientation getOrientation() {
-        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+    private void resetEncoders() {
+        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     private void sleep(double seconds) {

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.controllers;
 
-import org.firstinspires.ftc.teamcode.internal.Robot;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.BACK;
@@ -19,6 +18,6 @@ public class TiltController extends RobotController {
         else if (gamepad2.y) robot.tiltAccel(UP);
         else if (gamepad2.b) robot.tiltAccel(TILTED);
         else if (gamepad2.a) robot.tiltAccel(BACK);
-        else robot.tilt( (double)0);
+        else robot.tilt((double)0);
     }
 }
