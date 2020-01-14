@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -165,6 +166,20 @@ public class Robot {
             right /= max;
         }
 
+        double maxChange = 0.2;
+        
+        double leftCurent = left_front.getPower();
+        double leftChange = left - leftCurent;
+        if (leftChange > maxChange) leftChange = maxChange;
+        if (leftChange < -maxChange) leftChange = -maxChange;
+        left = leftCurent + leftChange;
+
+        double rightCurent = right_front.getPower();
+        double rightChange = right - rightCurent;
+        if (rightChange > maxChange) rightChange = maxChange;
+        if (rightChange < -maxChange) rightChange = -maxChange;
+        right = rightCurent + rightChange;
+
         left_front.setPower(left);
         left_rear.setPower(left);
         right_front.setPower(right);
@@ -254,7 +269,15 @@ public class Robot {
     }
 
     public void tiltAccel(double accel) {
+        while (opMode.isContinuing()) {
+            Acceleration acceleration = tilt_accelerometer.getAcceleration();
+            double remainder = acceleration.yAccel - accel;
+            double power = remainder / 10;
+            if(remainder > -0.1 && remainder < 0.1) break;
+            tilt.setPower(power);
+        }
 
+        tilt.setPower(0);
     }
 
     public void lift(double power) {
