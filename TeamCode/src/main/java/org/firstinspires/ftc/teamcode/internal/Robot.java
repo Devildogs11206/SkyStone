@@ -174,19 +174,23 @@ public class Robot {
             right /= max;
         }
 
-        double maxChange = 0.25;
+        double maxChange = 0.33;
 
-        double leftCurent = left_front.getPower();
-        double leftChange = left - leftCurent;
-        if (leftChange > maxChange) leftChange = maxChange;
-        if (leftChange < -maxChange) leftChange = -maxChange;
-        left = leftCurent + leftChange;
+        if (left != 0) {
+            double leftCurent = left_front.getPower();
+            double leftChange = left - leftCurent;
+            if (leftChange > maxChange) leftChange = maxChange;
+            if (leftChange < -maxChange) leftChange = -maxChange;
+            left = leftCurent + leftChange;
+        }
 
-        double rightCurent = right_front.getPower();
-        double rightChange = right - rightCurent;
-        if (rightChange > maxChange) rightChange = maxChange;
-        if (rightChange < -maxChange) rightChange = -maxChange;
-        right = rightCurent + rightChange;
+        if (right != 0) {
+            double rightCurent = right_front.getPower();
+            double rightChange = right - rightCurent;
+            if (rightChange > maxChange) rightChange = maxChange;
+            if (rightChange < -maxChange) rightChange = -maxChange;
+            right = rightCurent + rightChange;
+        }
 
         left_front.setPower(left);
         left_rear.setPower(left);
@@ -279,7 +283,7 @@ public class Robot {
     public static class TiltAccel {
         public static final double BACK = 9.8;
         public static final double TILTED = 8.5;
-        public static final double UP = 0.5;
+        public static final double UP = -0.5;
     }
 
     public void tiltAccel(double accel) {
@@ -346,13 +350,17 @@ public class Robot {
         lights.setPattern(pattern);
     }
 
-    public Recognition findNearestStone(){
+    public Recognition findNearestStone(Boolean lookingForSkystone){
         Recognition nearestRecognition = null;
+
+        String searchString = lookingForSkystone   ?"Skystone":"tone";
 
         for (Recognition recognition : recognitions) {
 
-
-            if(nearestRecognition == null || getArea(recognition) > getArea(nearestRecognition )){nearestRecognition = recognition;}
+            if(recognition.getLabel().contains(searchString) && (nearestRecognition == null ||
+               getArea(recognition) > getArea(nearestRecognition ))) {
+                nearestRecognition = recognition;
+            }
 
         }
         return nearestRecognition;
@@ -360,7 +368,7 @@ public class Robot {
 
     Boolean stonePickUp = false;
 
-    public void pickUpStone(){
+    public void pickUpStone(Boolean lookingForSkystone){
 
         stonePickUp = true;
 
@@ -368,21 +376,23 @@ public class Robot {
 
         while(opMode.isContinuing()){
 
-            Recognition stone = findNearestStone();
+            Recognition stone = findNearestStone(lookingForSkystone);
             if(stone == null){drive(0,0);continue;}
 
             double amountToTurn = stone.estimateAngleToObject(DEGREES)/90;
 
-            drive(0.25,amountToTurn);
+            drive(0.375,-0.1 - amountToTurn);
 
-            if(getArea(stone)>80000)break;
+            if(getArea(stone)>70000)break;
         }
 
-        tilt(UP);
+        drive(0,0);
+
+        tiltAccel(UP);
         claw(OPEN);
-        drive(0.3,0,8);
+        drive(0.3,getOrientation().firstAngle,16);
         claw(CLOSE);
-        tilt(BACK);
+        tiltAccel(BACK);
 
         setLights(GREEN);
         stonePickUp = false;
@@ -432,7 +442,7 @@ public class Robot {
             }
         }
 
-        if(!stonePickUp){setLights(stoneVisible ? YELLOW : BLACK);}
+        if(!stonePickUp){setLights(stoneVisible ? YELLOW : RevBlinkinLedDriver.BlinkinPattern.DARK_BLUE);}
 
     }
 

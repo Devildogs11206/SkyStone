@@ -164,7 +164,7 @@ public class VisionThread extends Thread {
             targetsSkyStone.activate();
 
             TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(robot.tfodMonitorViewId);
-            tfodParameters.minimumConfidence = 0.75;
+            tfodParameters.minimumConfidence = 0.6;
             tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
             tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
             tfod.activate();

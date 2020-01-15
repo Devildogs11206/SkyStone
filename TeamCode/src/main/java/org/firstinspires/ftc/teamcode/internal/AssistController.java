@@ -9,6 +9,6 @@ public class AssistController extends RobotController {
     }
     @Override
     public void execute() {
-        if(gamepad1.x){robot.pickUpStone();}
+        if(gamepad2.x){robot.pickUpStone(false);}
     }
 }
