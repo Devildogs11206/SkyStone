@@ -35,8 +35,8 @@ import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.IN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
-import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.TILTED;
 import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.BACK;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.TILTED;
 import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.UP;
 
 public class Robot {
@@ -59,6 +59,7 @@ public class Robot {
     private DcMotor tilt;
     private DigitalChannel tilt_limit;
     private ModernRoboticsI2cCompassSensor tilt_accelerometer;
+    private static boolean tilt_is_busy;
 
     private DcMotor lift;
 
@@ -153,7 +154,7 @@ public class Robot {
 
     public void calibrate() {
         setLights(RAINBOW_LAVA_PALETTE);
-        tilt(BACK);
+        tiltAccel(BACK);
         slide(IN);
     }
 
@@ -175,21 +176,17 @@ public class Robot {
 
         double maxChange = 0.25;
 
-        if (left != 0) {
-            double leftCurent = left_front.getPower();
-            double leftChange = left - leftCurent;
-            if (leftChange > maxChange) leftChange = maxChange;
-            if (leftChange < -maxChange) leftChange = -maxChange;
-            left = leftCurent + leftChange;
-        }
+        double leftCurent = left_front.getPower();
+        double leftChange = left - leftCurent;
+        if (leftChange > maxChange) leftChange = maxChange;
+        if (leftChange < -maxChange) leftChange = -maxChange;
+        left = leftCurent + leftChange;
 
-        if (right != 0) {
-            double rightCurent = right_front.getPower();
-            double rightChange = right - rightCurent;
-            if (rightChange > maxChange) rightChange = maxChange;
-            if (rightChange < -maxChange) rightChange = -maxChange;
-            right = rightCurent + rightChange;
-        }
+        double rightCurent = right_front.getPower();
+        double rightChange = right - rightCurent;
+        if (rightChange > maxChange) rightChange = maxChange;
+        if (rightChange < -maxChange) rightChange = -maxChange;
+        right = rightCurent + rightChange;
 
         left_front.setPower(left);
         left_rear.setPower(left);
@@ -208,6 +205,7 @@ public class Robot {
 
         while (opMode.isContinuing() && targetPosition - position > 0) {
             remainder = getRemainderLeftToTurn(heading);
+            power = clamp(0.1, power, TICKS_PER_INCH * 12d / (targetPosition - position));
             turn = remainder / 50;
             drive(power, turn);
 
@@ -227,7 +225,7 @@ public class Robot {
 
         do {
             remainder = getRemainderLeftToTurn(heading);
-            turn = remainder / Math.abs(remainder) * power;
+            turn = clamp(0.1, power, remainder / 45 * power);
             drive(0, turn);
         } while ((remainder < -1 || remainder > 1) && opMode.isActive());
 
@@ -246,7 +244,9 @@ public class Robot {
         }
 
         if (position == IN) {
-            while (opMode.isContinuing() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > 9) {
+
+            while(opMode.isContinuing() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > TILTED) {
+
                 slide.setPower(-power);
             }
         }
@@ -255,6 +255,7 @@ public class Robot {
     }
 
     public void tilt(double power) {
+        if (tilt_is_busy || isUntiltable(power)) return;
         tilt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         tilt.setPower(power);
     }
@@ -266,9 +267,11 @@ public class Robot {
     }
 
     public void tilt(int position) {
+        double power = 0.5;
+        if (tilt_is_busy || isUntiltable(power)) return;
         tilt.setTargetPosition(position);
         tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        tilt.setPower(0.5);
+        tilt.setPower(power);
 
         while(tilt.isBusy() && opMode.isContinuing());
     }
@@ -280,18 +283,35 @@ public class Robot {
     }
 
     public void tiltAccel(double accel) {
-        while (opMode.isContinuing()) {
+        if (tilt_is_busy) return;
+
+        tilt_is_busy = true;
+
+        do {
             Acceleration acceleration = tilt_accelerometer.getAcceleration();
             double remainder = acceleration.yAccel - accel;
-            double power = remainder / 10;
-            if(remainder > -0.1 && remainder < 0.1) break;
+            double power = clamp(0.05, 1, remainder / 10);
+            if(isUntiltable(power) || remainder > -0.1 && remainder < 0.1) break;
             tilt.setPower(power);
-        }
+        } while (opMode.isContinuing());
+
+        tilt_is_busy = false;
 
         tilt.setPower(0);
     }
 
+    public void tiltParallel(final double accel) {
+        new Thread() {
+            @Override
+            public void run() {
+                tiltAccel(accel);
+            }
+        }.start();
+    }
+
     public void lift(double power) {
+        if (tilt_accelerometer.getAcceleration().yAccel > TILTED) return;
+
         int minPos = 0;
         int maxPos = 10000;
 
@@ -370,6 +390,7 @@ public class Robot {
 
     private double getArea(Recognition recognition){
         return recognition.getWidth()*recognition.getHeight();
+
     }
 
     public void addTelemetry(){
@@ -415,6 +436,11 @@ public class Robot {
 
     }
 
+    private boolean isUntiltable(double power) {
+        double yAccel = tilt_accelerometer.getAcceleration().yAccel;
+        return slide_limit_rear.getState() || (power < 0 && yAccel > BACK) || (power > 0 && yAccel < UP);
+    }
+
     private Orientation getOrientation() {
         return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
@@ -437,6 +463,14 @@ public class Robot {
         right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    private double clamp(double min, double max, double value) {
+        if (value > max) value = max;
+        if (value > 0 && value < min) value = min;
+        if (value < 0 && value > -min) value = -min;
+        if (value < -max) value = -max;
+        return value;
     }
 
     private void sleep(double seconds) {
