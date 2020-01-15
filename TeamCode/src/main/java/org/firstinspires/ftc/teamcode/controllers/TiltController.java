@@ -15,9 +15,9 @@ public class TiltController extends RobotController {
     public void execute() {
         if (gamepad2.left_trigger > 0) robot.tilt(gamepad2.left_trigger);
         else if (gamepad2.right_trigger > 0) robot.tilt(-gamepad2.right_trigger);
-        else if (gamepad2.y) robot.tiltAccel(UP);
-        else if (gamepad2.b) robot.tiltAccel(TILTED);
-        else if (gamepad2.a) robot.tiltAccel(BACK);
+        else if (gamepad2.y) robot.tiltParallel(UP);
+        else if (gamepad2.b) robot.tiltParallel(TILTED);
+        else if (gamepad2.a) robot.tiltParallel(BACK);
         else robot.tilt((double)0);
     }
 }
