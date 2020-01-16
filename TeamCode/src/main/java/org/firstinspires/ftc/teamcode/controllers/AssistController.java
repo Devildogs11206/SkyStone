@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.internal;
+package org.firstinspires.ftc.teamcode.controllers;
 
-import org.firstinspires.ftc.teamcode.controllers.RobotController;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 public class AssistController extends RobotController {
@@ -9,6 +8,6 @@ public class AssistController extends RobotController {
     }
     @Override
     public void execute() {
-        if(gamepad2.x){robot.pickUpStone(false);}
+        if(gamepad2.x) robot.pickUpStone(false);
     }
 }

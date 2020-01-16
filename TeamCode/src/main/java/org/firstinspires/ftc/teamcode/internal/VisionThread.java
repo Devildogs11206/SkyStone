@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.internal;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
@@ -24,6 +26,9 @@ public class VisionThread extends Thread {
     private static final float mmPerInch = 25.4f;
     private static final float mmTargetHeight = (6) * mmPerInch; // the height of the center of the target image above the floor
 
+    // Constant for Stone Target
+    private static final float stoneZ = 2.00f * mmPerInch;
+
     // Constants for the center support targets
     private static final float bridgeZ = 6.42f * mmPerInch;
     private static final float bridgeY = 23 * mmPerInch;
@@ -42,8 +47,6 @@ public class VisionThread extends Thread {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Stone";
     private static final String LABEL_SECOND_ELEMENT = "Skystone";
-
-    public boolean targetVisible = false;
 
     private OpMode opMode;
     private Robot robot;
@@ -65,6 +68,8 @@ public class VisionThread extends Thread {
 
             VuforiaTrackables targetsSkyStone = this.vuforia.loadTrackablesFromAsset("Skystone");
 
+            VuforiaTrackable stoneTarget = targetsSkyStone.get(0);
+            stoneTarget.setName("Stone Target");
             VuforiaTrackable blueRearBridge = targetsSkyStone.get(1);
             blueRearBridge.setName("Blue Rear Bridge");
             VuforiaTrackable redRearBridge = targetsSkyStone.get(2);
@@ -90,12 +95,16 @@ public class VisionThread extends Thread {
             VuforiaTrackable rear2 = targetsSkyStone.get(12);
             rear2.setName("Rear Perimeter 2");
 
-            //removed "Stone Target"
-            //targetsSkyStone.remove(0);
-
             // For convenience, gather together all the trackable objects in one easily-iterable collection */
             List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
             allTrackables.addAll(targetsSkyStone);
+
+            // Set the position of the Stone Target.  Since it's not fixed in position, assume it's at the field origin.
+            // Rotated it to to face forward, and raised it to sit on the ground correctly.
+            // This can be used for generic target-centric approach algorithms
+            stoneTarget.setLocation(OpenGLMatrix
+                    .translation(0, 0, stoneZ)
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
 
             //Set the position of the bridge support targets with relation to origin (center of field)
             blueFrontBridge.setLocation(OpenGLMatrix
@@ -155,7 +164,7 @@ public class VisionThread extends Thread {
 
             OpenGLMatrix robotFromCamera = OpenGLMatrix
                     .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
-                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, -90, 0, -70));
+                    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, -90, 0, -75));
 
             for (VuforiaTrackable trackable : allTrackables) {
                 ((VuforiaTrackableDefaultListener) trackable.getListener()).setCameraLocationOnRobot(robot.webcamName, robotFromCamera);
@@ -164,7 +173,7 @@ public class VisionThread extends Thread {
             targetsSkyStone.activate();
 
             TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(robot.tfodMonitorViewId);
-            tfodParameters.minimumConfidence = 0.6;
+            tfodParameters.minimumConfidence = 0.70;
             tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
             tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
             tfod.activate();
@@ -173,36 +182,36 @@ public class VisionThread extends Thread {
 
             while (opMode.isActive()) {
                 // check all the trackable targets to see which one (if any) is visible.
-                targetVisible = false;
+                boolean targetVisible = false;
 
                 for (VuforiaTrackable trackable : allTrackables) {
-                    if(trackable.getName() == "Stone Target")continue;
                     if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
-                        targetVisible = true;
-
-                        // getUpdatedRobotLocation() will return null if no new information is available since
-                        // the last time that call was made, or if the trackable is not currently visible.
                         OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-                        if (robotLocationTransform != null) {
-                            lastLocation = robotLocationTransform;
-                        }
 
-                        break;
+                        if (robotLocationTransform != null) {
+                            VectorF translation = robotLocationTransform.getTranslation();
+
+                            Position position = new Position(
+                                DistanceUnit.INCH,
+                                translation.get(0) / mmPerInch,
+                                translation.get(1) / mmPerInch,
+                                translation.get(2) / mmPerInch,
+                                System.nanoTime()
+                            );
+
+                            Orientation orientation = Orientation.getOrientation(robotLocationTransform, EXTRINSIC, XYZ, DEGREES);
+
+                            if (trackable.getName() != "Stone Target") {
+                                targetVisible = true;
+                                lastLocation = robotLocationTransform;
+                                robot.position = position;
+                                robot.orientation = orientation;
+                            }
+                        }
                     }
                 }
 
-                // Provide feedback as to where the robot is located (if we know).
-                if (targetVisible) {
-                    // express position (translation) of robot in inches.
-                    VectorF translation = lastLocation.getTranslation();
-
-                    robot.position.x = translation.get(0) / mmPerInch;
-                    robot.position.y = translation.get(1) / mmPerInch;
-                    robot.position.z = translation.get(2) / mmPerInch;
-                    robot.position.acquisitionTime = System.nanoTime();
-
-                    robot.orientation = Orientation.getOrientation(lastLocation,EXTRINSIC,XYZ,DEGREES);
-                }
+                robot.targetVisible = targetVisible;
 
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 
@@ -212,9 +221,8 @@ public class VisionThread extends Thread {
             }
 
             targetsSkyStone.deactivate();
-        } catch (Exception e){
-            opMode.telemetry.addData("VisionThread Error", e);
-            opMode.telemetry.update();
+        } catch (Exception e) {
+            robot.error = e.toString();
         }
     }
 }

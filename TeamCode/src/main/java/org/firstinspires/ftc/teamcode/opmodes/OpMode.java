@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.internal.Alliance;
 import org.firstinspires.ftc.teamcode.internal.Robot;
 import org.firstinspires.ftc.teamcode.controllers.RobotController;
+
+import static org.firstinspires.ftc.teamcode.internal.Alliance.UNKNOWN;
 
 public abstract class OpMode extends LinearOpMode {
     private boolean calibrate = false;
@@ -23,7 +26,7 @@ public abstract class OpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this);
-        robot.init();
+        robot.init(getAlliance());
         if (calibrate) robot.calibrate();
         waitForStart();
         robot.start();
@@ -40,9 +43,13 @@ public abstract class OpMode extends LinearOpMode {
         return !isStopRequested() && !gamepad1.back && !gamepad2.back;
     }
 
-    private void yield() {
-        sleep(50);
+    protected Alliance getAlliance() {
+        return UNKNOWN;
     }
 
     protected abstract void execute();
+
+    private void yield() {
+        sleep(50);
+    }
 }

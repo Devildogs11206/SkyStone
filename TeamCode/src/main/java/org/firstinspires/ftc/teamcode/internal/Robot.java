@@ -10,9 +10,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -24,24 +21,48 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.BLACK;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.BLUE;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.GRAY;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.GREEN;
-import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_BLUE;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_GRAY;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_RED;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_BLUE;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_GRAY;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.RAINBOW_LAVA_PALETTE;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.RED;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.YELLOW;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_TO_POSITION;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
+import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
+import static com.qualcomm.robotcore.hardware.DigitalChannel.Mode.INPUT;
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.ZYX;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.INTRINSIC;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.IN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
-import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.BACK;
-import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.TILTED;
-import static org.firstinspires.ftc.teamcode.internal.Robot.TiltAccel.UP;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.BACK;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.TILTED;
+import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.UP;
 
 public class Robot {
     private static final double INCHES_PER_ROTATION = 3.95 * Math.PI;
     private static final double TICKS_PER_INCH = 1120 / INCHES_PER_ROTATION;
+
+    private static RevBlinkinLedDriver.BlinkinPattern DEFAULT_COLOR = GRAY;
+    private static RevBlinkinLedDriver.BlinkinPattern CALIBRATE_COLOR = RAINBOW_LAVA_PALETTE;
+    private static RevBlinkinLedDriver.BlinkinPattern READY_COLOR = HEARTBEAT_GRAY;
+    private static RevBlinkinLedDriver.BlinkinPattern SEARCHING_COLOR = LIGHT_CHASE_GRAY;
+    private static RevBlinkinLedDriver.BlinkinPattern PICKUP_COLOR = GREEN;
+    private static RevBlinkinLedDriver.BlinkinPattern TARGET_COLOR = YELLOW;
 
     private OpMode opMode;
 
@@ -59,7 +80,7 @@ public class Robot {
     private DcMotor tilt;
     private DigitalChannel tilt_limit;
     private ModernRoboticsI2cCompassSensor tilt_accelerometer;
-    private static boolean tilt_is_busy;
+    private boolean tiltIsBusy = false;
 
     private DcMotor lift;
 
@@ -76,15 +97,19 @@ public class Robot {
     public int cameraMonitorViewId;
     public int tfodMonitorViewId;
 
+    public boolean targetVisible = false;
     public Position position = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
     public Orientation orientation = new Orientation();
+
     public List<Recognition> recognitions = null;
+
+    public String error;
 
     public Robot(OpMode opMode) {
         this.opMode = opMode;
     }
 
-    public void init() {
+    public void init(Alliance alliance) {
         HardwareMap hardwareMap = opMode.hardwareMap;
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -98,44 +123,43 @@ public class Robot {
         imu.initialize(parameters);
 
         left_front = hardwareMap.get(DcMotor.class, "left_front");
-        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_front.setDirection(DcMotor.Direction.FORWARD);
+        left_front.setMode(STOP_AND_RESET_ENCODER);
+        left_front.setMode(RUN_USING_ENCODER);
+        left_front.setDirection(FORWARD);
         left_rear = hardwareMap.get(DcMotor.class,"left_rear");
-        left_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_rear.setDirection(DcMotor.Direction.FORWARD);
+        left_rear.setMode(STOP_AND_RESET_ENCODER);
+        left_rear.setMode(RUN_USING_ENCODER);
+        left_rear.setDirection(FORWARD);
         right_front = hardwareMap.get(DcMotor.class,"right_front");
-        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_front.setDirection(DcMotor.Direction.REVERSE);
+        right_front.setMode(STOP_AND_RESET_ENCODER);
+        right_front.setMode(RUN_USING_ENCODER);
+        right_front.setDirection(REVERSE);
         right_rear = hardwareMap.get(DcMotor.class, "right_rear");
-        right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_rear.setDirection(DcMotor.Direction.REVERSE);
+        right_rear.setMode(STOP_AND_RESET_ENCODER);
+        right_rear.setMode(RUN_USING_ENCODER);
+        right_rear.setDirection(REVERSE);
 
         slide = hardwareMap.get(DcMotor.class,"slide");
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setDirection(DcMotor.Direction.REVERSE);
+        slide.setMode(STOP_AND_RESET_ENCODER);
+        slide.setMode(RUN_USING_ENCODER);
+        slide.setZeroPowerBehavior(BRAKE);
+        slide.setDirection(REVERSE);
         slide_limit_front = hardwareMap.get(DigitalChannel.class, "slide_limit_front");
-        slide_limit_front.setMode(DigitalChannel.Mode.INPUT);
+        slide_limit_front.setMode(INPUT);
         slide_limit_rear = hardwareMap.get(DigitalChannel.class, "slide_limit_rear");
-        slide_limit_rear.setMode(DigitalChannel.Mode.INPUT);
+        slide_limit_rear.setMode(INPUT);
 
         tilt = hardwareMap.get(DcMotor.class, "tilt");
-        tilt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        tilt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        tilt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        tilt.setMode(RUN_USING_ENCODER);
+        tilt.setZeroPowerBehavior(BRAKE);
         tilt_limit = hardwareMap.get(DigitalChannel.class, "tilt_limit");
         tilt_accelerometer = hardwareMap.get(ModernRoboticsI2cCompassSensor.class, "tilt_accelerometer");
 
         lift = hardwareMap.get(DcMotor.class, "lift");
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setDirection(DcMotor.Direction.REVERSE);
+        lift.setMode(STOP_AND_RESET_ENCODER);
+        lift.setMode(RUN_USING_ENCODER);
+        lift.setZeroPowerBehavior(BRAKE);
+        lift.setDirection(REVERSE);
 
         claw_left = hardwareMap.get(Servo.class, "claw_left");
         claw_right = hardwareMap.get(Servo.class, "claw_right");
@@ -153,17 +177,22 @@ public class Robot {
     }
 
     public void calibrate() {
-        setLights(RAINBOW_LAVA_PALETTE);
-        tiltAccel(BACK);
+        setLights(CALIBRATE_COLOR);
+        if (tilt.getCurrentPosition() == 0) tiltReset();
+        tilt(BACK);
         slide(IN);
+        setLights(READY_COLOR);
     }
 
     public void start() {
-        setLights(BLACK);
+        setLights(DEFAULT_COLOR);
         slide(OUT);
+        if (tilt.getCurrentPosition() == 0) tiltReset();
     }
 
     public void drive(double power, double turn) {
+        if (!opMode.isContinuing()) return;
+
         double left = power + turn;
         double right = power - turn;
 
@@ -175,22 +204,10 @@ public class Robot {
         }
 
         double maxChange = 0.33;
-
-        if (left != 0) {
-            double leftCurent = left_front.getPower();
-            double leftChange = left - leftCurent;
-            if (leftChange > maxChange) leftChange = maxChange;
-            if (leftChange < -maxChange) leftChange = -maxChange;
-            left = leftCurent + leftChange;
-        }
-
-        if (right != 0) {
-            double rightCurent = right_front.getPower();
-            double rightChange = right - rightCurent;
-            if (rightChange > maxChange) rightChange = maxChange;
-            if (rightChange < -maxChange) rightChange = -maxChange;
-            right = rightCurent + rightChange;
-        }
+        double leftCurrent = left_front.getPower();
+        double rightCurrent = right_front.getPower();
+        if (left != 0) left = leftCurrent + clamp(-maxChange, maxChange, left - leftCurrent);
+        if (right != 0) right = rightCurrent + clamp(-maxChange, maxChange, right - rightCurrent);
 
         left_front.setPower(left);
         left_rear.setPower(left);
@@ -199,7 +216,10 @@ public class Robot {
     }
 
     public void drive(double power, double heading, double inches) {
+        if (!opMode.isContinuing()) return;
+
         turn(power, heading);
+
         resetEncoders();
 
         int targetPosition = (int)(inches * TICKS_PER_INCH);
@@ -209,8 +229,8 @@ public class Robot {
 
         while (opMode.isContinuing() && targetPosition - position > 0) {
             remainder = getRemainderLeftToTurn(heading);
-            power = clamp(0.1, power, TICKS_PER_INCH * 12d / (targetPosition - position));
-            turn = remainder / 50;
+            power = clamp(0.2, power, (1 - (double)position / targetPosition) * TICKS_PER_INCH * 12);
+            turn = remainder / 45;
             drive(power, turn);
 
             position = (
@@ -225,13 +245,17 @@ public class Robot {
     }
 
     public void turn(double power, double heading) {
+        if (!opMode.isContinuing()) return;
+
+        power = Math.abs(power);
+
         double remainder, turn;
 
         do {
             remainder = getRemainderLeftToTurn(heading);
-            turn = clamp(0.1, power, remainder / 45 * power);
+            turn = clamp(0.2, power, remainder / 45 * power);
             drive(0, turn);
-        } while ((remainder < -1 || remainder > 1) && opMode.isActive());
+        } while (opMode.isContinuing() && (remainder < -1 || remainder > 1));
 
         drive(0,0);
     }
@@ -239,6 +263,8 @@ public class Robot {
     public enum SlidePosition{ IN, OUT }
 
     public void slide(SlidePosition position) {
+        if (!opMode.isContinuing()) return;
+
         final double power = 0.5;
 
         if (position == OUT) {
@@ -248,9 +274,8 @@ public class Robot {
         }
 
         if (position == IN) {
-
-            while(opMode.isContinuing() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > TILTED) {
-
+            while (opMode.isContinuing() && slide_limit_front.getState() && tilt_accelerometer.getAcceleration().yAccel > TILTED.accel) {
+                slide.setMode(RUN_USING_ENCODER);
                 slide.setPower(-power);
             }
         }
@@ -258,63 +283,65 @@ public class Robot {
         slide.setPower(0);
     }
 
+    public enum TiltPosition {
+        BACK(9.8, 0), TILTED(7.0, 1000), UP(-1.0, 3400);
+
+        public double accel;
+        public int ticks;
+
+        TiltPosition(double accel, int ticks) {
+            this.accel = accel;
+            this.ticks = ticks;
+        }
+    }
+
     public void tilt(double power) {
-        if (tilt_is_busy || isUntiltable(power)) return;
-        tilt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        if (!opMode.isContinuing() || tilt.isBusy() || isUntiltable(power)) return;
+        tilt.setMode(RUN_USING_ENCODER);
         tilt.setPower(power);
     }
 
-    public static class TiltPosition {
-        public static final int BACK = 0;
-        public static final int TILTED = 1000;
-        public static final int UP = 3400;
+    public void tilt(TiltPosition position) {
+        if (!opMode.isContinuing()) return;
+        tiltAsync(position);
+        while (opMode.isContinuing() && tilt.isBusy());
     }
 
-    public void tilt(int position) {
-        double power = 0.5;
-        if (tilt_is_busy || isUntiltable(power)) return;
-        tilt.setTargetPosition(position);
-        tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        tilt.setPower(power);
-
-        while(tilt.isBusy() && opMode.isContinuing());
+    public void tiltAsync(TiltPosition position) {
+        if (!opMode.isContinuing() || isUntiltable(0)) return;
+        tilt.setTargetPosition(position.ticks);
+        tilt.setMode(RUN_TO_POSITION);
+        tilt.setPower(0.5);
     }
 
-    public static class TiltAccel {
-        public static final double BACK = 9.8;
-        public static final double TILTED = 8.5;
-        public static final double UP = -0.5;
+    protected void tiltReset() {
+        tiltAccel(TILTED);
+        tiltAccel(BACK);
+        tilt.setMode(STOP_AND_RESET_ENCODER);
     }
 
-    public void tiltAccel(double accel) {
-        if (tilt_is_busy) return;
-
-        tilt_is_busy = true;
-
-        do {
+    protected void tiltAccel(TiltPosition position) {
+        while (opMode.isContinuing()) {
             Acceleration acceleration = tilt_accelerometer.getAcceleration();
-            double remainder = acceleration.yAccel - accel;
-            double power = clamp(0.05, 1, remainder / 10);
-            if(isUntiltable(power) || remainder > -0.1 && remainder < 0.1) break;
+            double remainder = acceleration.yAccel - position.accel;
+            double power = clamp(0.25, 1, remainder / 10);
+            if (remainder > -0.25 && remainder < 0.25) break;
             tilt.setPower(power);
-        } while (opMode.isContinuing());
-
-        tilt_is_busy = false;
+        }
 
         tilt.setPower(0);
     }
 
-    public void tiltParallel(final double accel) {
-        new Thread() {
-            @Override
-            public void run() {
-                tiltAccel(accel);
-            }
-        }.start();
+    private boolean isUntiltable(double power) {
+        double yAccel = tilt_accelerometer.getAcceleration().yAccel;
+
+        return slide_limit_rear.getState() ||
+            (power < 0 && yAccel > BACK.accel) ||
+            (power > 0 && yAccel < UP.accel);
     }
 
     public void lift(double power) {
-        if (tilt_accelerometer.getAcceleration().yAccel > TILTED) return;
+        if (tilt_accelerometer.getAcceleration().yAccel > TILTED.accel) return;
 
         int minPos = 0;
         int maxPos = 10000;
@@ -328,79 +355,73 @@ public class Robot {
         }
     }
 
-    public void stickToggle(){
-        if (stick.getPosition() > 0.5) {
-            stick.setPosition(0.0);
-        } else {
-            stick.setPosition(1.0);
-        }
-
-        sleep(0.25);
-    }
-
     public enum ClawPosition { OPEN, CLOSE }
 
     public void claw(ClawPosition position) {
+        if (!opMode.isContinuing()) return;
         claw_left.setPosition(position == OPEN ? 1 : 0.15);
         claw_right.setPosition(position == CLOSE ? 0.85 : 0.25 );
         sleep(0.25);
     }
 
+    public void stickToggle(){
+        if (!opMode.isContinuing()) return;
+        double power = stick.getPosition() > 0.5 ? 0 : 1;
+        stick.setPosition(power);
+        sleep(0.25);
+    }
+
     public void setLights (RevBlinkinLedDriver.BlinkinPattern pattern){
-        lights.setPattern(pattern);
+        lights.setPattern(pattern == BLACK ? DEFAULT_COLOR : pattern);
     }
 
     public Recognition findNearestStone(Boolean lookingForSkystone){
         Recognition nearestRecognition = null;
 
-        String searchString = lookingForSkystone   ?"Skystone":"tone";
+        String searchString = lookingForSkystone ? "skystone" : "stone";
 
         for (Recognition recognition : recognitions) {
-
-            if(recognition.getLabel().contains(searchString) && (nearestRecognition == null ||
-               getArea(recognition) > getArea(nearestRecognition ))) {
+            if (recognition.getLabel().toLowerCase().contains(searchString) && (
+                nearestRecognition == null ||
+                recognition.getHeight() > nearestRecognition.getHeight()
+            )) {
                 nearestRecognition = recognition;
             }
-
         }
+
         return nearestRecognition;
     }
 
     Boolean stonePickUp = false;
 
-    public void pickUpStone(Boolean lookingForSkystone){
+    public void pickUpStone(boolean lookingForStone) {
+        if (!opMode.isContinuing()) return;
 
         stonePickUp = true;
-
-        setLights(LARSON_SCANNER_RED);
+        setLights(SEARCHING_COLOR);
+        double power = 0.25;
 
         while(opMode.isContinuing()){
-
-            Recognition stone = findNearestStone(lookingForSkystone);
+            Recognition stone = findNearestStone(lookingForStone);
             if(stone == null){drive(0,0);continue;}
-
-            double amountToTurn = stone.estimateAngleToObject(DEGREES)/90;
-
-            drive(0.375,-0.1 - amountToTurn);
-
-            if(getArea(stone)>70000)break;
+            double amountToTurn = stone.estimateAngleToObject(DEGREES) / 45;
+            drive(power, -amountToTurn + 0.075);
+            if(stone.getHeight() > 350) break;
         }
 
         drive(0,0);
 
-        tiltAccel(UP);
+        drive(-power, getOrientation().firstAngle,4);
         claw(OPEN);
-        drive(0.3,getOrientation().firstAngle,16);
+        tilt(UP);
+        drive(power, getOrientation().firstAngle,16);
         claw(CLOSE);
-        tiltAccel(BACK);
+        tilt(TILTED);
 
-        setLights(GREEN);
+        setLights(PICKUP_COLOR);
+        sleep(0.5);
+        setLights(DEFAULT_COLOR);
         stonePickUp = false;
-    }
-
-    private double getArea(Recognition recognition){
-        return recognition.getWidth()*recognition.getHeight();
-
     }
 
     public void addTelemetry(){
@@ -418,11 +439,12 @@ public class Robot {
         telemetry.addData("Tilt","%.2f Pow, %d Pos", tilt.getPower(), tilt.getCurrentPosition());
         telemetry.addData("Tilt Limit", tilt_limit.getState());
         telemetry.addData("Tilt Accelerometer", tilt_accelerometer.getAcceleration());
+        telemetry.addData("Tilt isUntiltable", isUntiltable(0));
         telemetry.addData("Lift","%.2f Pow, %d Pos", lift.getPower(), lift.getCurrentPosition());
-        telemetry.addData("Orientation", orientation);
-        telemetry.addData("Target", visionThread.targetVisible);
+        telemetry.addData("Target Visible", targetVisible);
         telemetry.addData("Position (in)", position);
-        telemetry.addData("PickUpStone running",stonePickUp);
+        telemetry.addData("Orientation", orientation);
+        telemetry.addData("PickUpStone running", stonePickUp);
 
         Boolean stoneVisible = false;
 
@@ -433,54 +455,52 @@ public class Robot {
                 telemetry.addData(" label", recognition.getLabel());
                 telemetry.addData("  left,top", "%.3f , %.3f", recognition.getLeft(), recognition.getTop());
                 telemetry.addData("  right,bottom", "%.3f , %.3f", recognition.getRight(), recognition.getBottom());
-                telemetry.addData("  height,width", "%.3f , %.3f", recognition.getBottom() - recognition.getTop(), recognition.getRight() - recognition.getLeft());
+                telemetry.addData("  height,width", "%.3f , %.3f", recognition.getHeight(), recognition.getWidth());
                 telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
-                telemetry.addData("  area", "%.3f", (recognition.getRight() - recognition.getLeft()) * (recognition.getBottom() - recognition.getTop()));
+                telemetry.addData("  area", "%.3f", recognition.getWidth() * recognition.getHeight());
 
-                if(recognition.getLabel().contains("tone")){stoneVisible = true;}
-
+                if (recognition.getLabel().toLowerCase().contains("stone")) {
+                    stoneVisible = true;
+                }
             }
         }
 
-        if(!stonePickUp){setLights(stoneVisible ? YELLOW : RevBlinkinLedDriver.BlinkinPattern.DARK_BLUE);}
+        if(!stonePickUp) {
+            setLights(stoneVisible ? TARGET_COLOR : DEFAULT_COLOR);
+        }
 
+        if (error != null && !error.isEmpty())
+            telemetry.addData("Error", error);
     }
 
-    private boolean isUntiltable(double power) {
-        double yAccel = tilt_accelerometer.getAcceleration().yAccel;
-        return slide_limit_rear.getState() || (power < 0 && yAccel > BACK) || (power > 0 && yAccel < UP);
-    }
-
-    private Orientation getOrientation() {
-        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+    public Orientation getOrientation() {
+        return imu.getAngularOrientation(INTRINSIC, ZYX, DEGREES);
     }
 
     private double getRemainderLeftToTurn(double heading) {
         double remainder;
         orientation = getOrientation();
         remainder = orientation.firstAngle - heading;
-        if (remainder > 180) remainder -= 360;
+        if (remainder > +180) remainder -= 360;
         if (remainder < -180) remainder += 360;
         return remainder;
     }
 
     private void resetEncoders() {
-        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_rear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_rear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left_front.setMode(STOP_AND_RESET_ENCODER);
+        left_front.setMode(RUN_USING_ENCODER);
+        left_rear.setMode(STOP_AND_RESET_ENCODER);
+        left_rear.setMode(RUN_USING_ENCODER);
+        right_front.setMode(STOP_AND_RESET_ENCODER);
+        right_front.setMode(RUN_USING_ENCODER);
+        right_rear.setMode(STOP_AND_RESET_ENCODER);
+        right_rear.setMode(RUN_USING_ENCODER);
     }
 
     private double clamp(double min, double max, double value) {
-        if (value > max) value = max;
-        if (value > 0 && value < min) value = min;
-        if (value < 0 && value > -min) value = -min;
-        if (value < -max) value = -max;
-        return value;
+        return value >= 0 ?
+            Math.min(max, Math.max(min, value)) :
+            Math.min(-min, Math.max(-max, value));
     }
 
     private void sleep(double seconds) {
