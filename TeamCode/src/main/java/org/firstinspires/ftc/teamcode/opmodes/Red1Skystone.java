@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.AQUA;
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.CONFETTI;
+import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.HOT_PINK;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
-import static org.firstinspires.ftc.teamcode.internal.Robot.SlidePosition.OUT;
 import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.TILTED;
 import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.UP;
 
@@ -17,13 +19,13 @@ public class Red1Skystone extends RedOpMode {
 
         robot.drive(power,0,12);
 
-        robot.turn(power, 30);
+        robot.turn(power, -10);
 
         while (isContinuing() &&
-            !robot.isSkystoneVisible() &&
-            robot.findNearestStone(true) == null &&
-            robot.getOrientation().firstAngle > -10)
-            robot.drive(0, 0.1);
+                !robot.isSkystoneVisible() &&
+                robot.findNearestStone(true) == null &&
+                robot.getOrientation().firstAngle < 45)
+            robot.drive(0, -0.05);
 
         robot.drive(0, 0);
 
@@ -39,7 +41,7 @@ public class Red1Skystone extends RedOpMode {
             robot.tilt(TILTED);
         }
 
-        robot.drive(-power, robot.getOrientation().firstAngle, 8);
+        robot.drive(-power, robot.getOrientation().firstAngle, 7);
         robot.drive(power, -90, 64);
         robot.claw(OPEN);
         robot.drive(-power, -90, 32);

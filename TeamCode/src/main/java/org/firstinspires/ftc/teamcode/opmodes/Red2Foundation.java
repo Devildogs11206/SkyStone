@@ -11,11 +11,12 @@ public class Red2Foundation extends RedOpMode {
     protected void execute() {
         double power = 0.5;
         robot.drive(power,0,4);
-        robot.drive(power,-45,12 );
+        robot.drive(power,-60,15 );
         robot.drive(power,0,12);
+        robot.drive(-0.1,0,1);
         robot.tilt(UP);
-        robot.drive(-power,0,36);
+        robot.drive(-power,0,42);
         robot.tilt(BACK);
-        robot.drive(-power,-90,36);
+        robot.drive(-power,-90,48);
     }
 }

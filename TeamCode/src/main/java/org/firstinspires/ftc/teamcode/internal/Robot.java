@@ -105,6 +105,8 @@ public class Robot {
     public Position skystonePosition = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
     public Orientation skystoneOrientation = new Orientation();
 
+    public double skystoneHeight;
+
     public List<Recognition> recognitions = null;
 
     public String error;
@@ -434,13 +436,24 @@ public class Robot {
             if(stone != null) break;
         }
 
-        turn(power,getOrientation().firstAngle + stone.estimateAngleToObject(DEGREES)+7.95321);
+        double offset = ((-2 / 75) * stone.getHeight()) + 11.667;
+
+        turn(power,getOrientation().firstAngle + stone.estimateAngleToObject(DEGREES)+offset);
         while(opMode.isContinuing()){
             stone = findNearestStone(lookingForStone);
             if(stone == null){drive(0,0);}
             else if(stone.getHeight()>300){break;}
             else{drive(power,0);}
         }
+
+         while(opMode.isContinuing()){
+             offset = ((-2 / 75) * stone.getHeight()) + 11.667;
+             double angle = stone.estimateAngleToObject(DEGREES)+offset;
+             if(stone == null){drive(0,0);}
+             else if(stone.getHeight()>250)break;
+             else{drive(power,angle/45);}
+         }
+
 
 
         drive(0,0);
