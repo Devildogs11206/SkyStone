@@ -22,13 +22,16 @@ public class Blue1Skystone extends BlueOpMode {
         robot.turn(power, 10);
 
         while (isContinuing() &&
+            !robot.isSkystoneVisible() &&
             robot.findNearestStone(true) == null &&
             robot.getOrientation().firstAngle > -45)
             robot.drive(0, 0.05);
 
         robot.drive(0, 0);
 
-        if (robot.findNearestStone(true) != null) {
+        if (robot.isSkystoneVisible()) {
+            robot.pickUpSkystone();
+        } else if (robot.findNearestStone(true) != null) {
             robot.pickUpStone(true);
         } else {
             robot.claw(OPEN);

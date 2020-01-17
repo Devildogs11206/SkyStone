@@ -183,6 +183,7 @@ public class VisionThread extends Thread {
             while (opMode.isActive()) {
                 // check all the trackable targets to see which one (if any) is visible.
                 boolean targetVisible = false;
+                boolean skystoneVisible = false;
 
                 for (VuforiaTrackable trackable : allTrackables) {
                     if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
@@ -206,12 +207,17 @@ public class VisionThread extends Thread {
                                 lastLocation = robotLocationTransform;
                                 robot.position = position;
                                 robot.orientation = orientation;
+                            } else {
+                                skystoneVisible = true;
+                                robot.skystonePosition = position;
+                                robot.skystoneOrientation = orientation;
                             }
                         }
                     }
                 }
 
                 robot.targetVisible = targetVisible;
+                robot.skystoneVisible = skystoneVisible;
 
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 

@@ -101,6 +101,10 @@ public class Robot {
     public Position position = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
     public Orientation orientation = new Orientation();
 
+    public boolean skystoneVisible = false;
+    public Position skystonePosition = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
+    public Orientation skystoneOrientation = new Orientation();
+
     public List<Recognition> recognitions = null;
 
     public String error;
@@ -410,6 +414,10 @@ public class Robot {
         return nearestRecognition;
     }
 
+    public boolean isSkystoneVisible() {
+        return skystoneVisible || (System.nanoTime() - skystonePosition.acquisitionTime < 1000000000);
+    }
+
     Boolean stonePickUp = false;
 
     public void pickUpStone(boolean lookingForStone) {
@@ -433,6 +441,37 @@ public class Robot {
         claw(OPEN);
         tilt(UP);
         drive(power, getOrientation().firstAngle,16);
+        claw(CLOSE);
+        tilt(TILTED);
+
+        setLights(PICKUP_COLOR);
+        sleep(0.5);
+        setLights(DEFAULT_COLOR);
+        stonePickUp = false;
+    }
+
+    public void pickUpSkystone(){
+        if (!opMode.isContinuing()) return;
+
+        stonePickUp = true;
+        setLights(SEARCHING_COLOR);
+
+        double power = 0.25;
+
+        while(opMode.isContinuing() && !isSkystoneVisible());
+
+        double targetAngle = Math.toDegrees(Math.atan2(-skystonePosition.y, -skystonePosition.x));
+        double currentAngle = skystoneOrientation.thirdAngle;
+        double heading = getOrientation().firstAngle + (targetAngle - currentAngle) - 5;
+
+        double inches = Math.sqrt(
+            Math.pow(skystonePosition.x, 2) +
+            Math.pow(skystonePosition.y, 2)
+        );
+
+        claw(OPEN);
+        tilt(UP);
+        drive(power, heading, inches - 8);
         claw(CLOSE);
         tilt(TILTED);
 
@@ -469,6 +508,9 @@ public class Robot {
         telemetry.addData("Target Visible", targetVisible);
         telemetry.addData("Position (in)", position);
         telemetry.addData("Orientation", orientation);
+        telemetry.addData("Skystone Visible", skystoneVisible);
+        telemetry.addData("Skystone Position (in)", skystonePosition);
+        telemetry.addData("Skystone Orientation", skystoneOrientation);
         telemetry.addData("PickUpStone running", stonePickUp);
 
         Boolean stoneVisible = false;
