@@ -24,7 +24,7 @@ public class Blue1Skystone extends BlueOpMode {
         while (isContinuing() &&
             robot.findNearestStone(true) == null &&
             robot.getOrientation().firstAngle > -45)
-            robot.drive(0, 0.1);
+            robot.drive(0, 0.05);
 
         robot.drive(0, 0);
 
@@ -38,9 +38,9 @@ public class Blue1Skystone extends BlueOpMode {
             robot.tilt(TILTED);
         }
 
-        robot.drive(-power, robot.getOrientation().firstAngle, 8);
-        robot.drive(power, 90, 32);
+        robot.drive(-power, robot.getOrientation().firstAngle, 4);
+        robot.drive(power, 90, 64);
         robot.claw(OPEN);
-        robot.drive(-power, 90, 16);
+        robot.drive(-power, 90, 32);
     }
 }

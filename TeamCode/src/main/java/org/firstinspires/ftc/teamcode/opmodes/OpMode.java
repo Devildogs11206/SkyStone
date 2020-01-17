@@ -50,6 +50,6 @@ public abstract class OpMode extends LinearOpMode {
     protected abstract void execute();
 
     private void yield() {
-        sleep(50);
+        Thread.yield();
     }
 }

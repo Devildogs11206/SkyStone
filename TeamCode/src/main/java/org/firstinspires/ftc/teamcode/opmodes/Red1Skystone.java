@@ -37,8 +37,8 @@ public class Red1Skystone extends RedOpMode {
         }
 
         robot.drive(-power, robot.getOrientation().firstAngle, 8);
-        robot.drive(power, -90, 32);
+        robot.drive(power, -90, 64);
         robot.claw(OPEN);
-        robot.drive(-power, -90, 16);
+        robot.drive(-power, -90, 32);
     }
 }

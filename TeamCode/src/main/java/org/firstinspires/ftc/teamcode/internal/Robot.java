@@ -174,6 +174,18 @@ public class Robot {
 
         visionThread = new VisionThread(opMode,this);
         visionThread.start();
+
+        if (alliance == Alliance.RED) {
+            DEFAULT_COLOR = RED;
+            READY_COLOR = HEARTBEAT_RED;
+            SEARCHING_COLOR = LIGHT_CHASE_RED;
+        }
+
+        if (alliance == Alliance.BLUE) {
+            DEFAULT_COLOR = BLUE;
+            READY_COLOR = HEARTBEAT_BLUE;
+            SEARCHING_COLOR = LIGHT_CHASE_BLUE;
+        }
     }
 
     public void calibrate() {
@@ -203,11 +215,11 @@ public class Robot {
             right /= max;
         }
 
-        double maxChange = 0.33;
-        double leftCurrent = left_front.getPower();
-        double rightCurrent = right_front.getPower();
-        if (left != 0) left = leftCurrent + clamp(-maxChange, maxChange, left - leftCurrent);
-        if (right != 0) right = rightCurrent + clamp(-maxChange, maxChange, right - rightCurrent);
+//        double maxChange = 0.33;
+//        double leftCurrent = left_front.getPower();
+//        double rightCurrent = right_front.getPower();
+//        if (left != 0) left = leftCurrent + clamp(-maxChange, maxChange, left - leftCurrent);
+//        if (right != 0) right = rightCurrent + clamp(-maxChange, maxChange, right - rightCurrent);
 
         left_front.setPower(left);
         left_rear.setPower(left);
@@ -296,19 +308,20 @@ public class Robot {
     }
 
     public void tilt(double power) {
-        if (!opMode.isContinuing() || tilt.isBusy() || isUntiltable(power)) return;
+        if (!opMode.isContinuing() || isUntiltable(power)) return;
         tilt.setMode(RUN_USING_ENCODER);
         tilt.setPower(power);
     }
 
     public void tilt(TiltPosition position) {
-        if (!opMode.isContinuing()) return;
+        if (!opMode.isContinuing() || isUntiltable(0)) return;
         tiltAsync(position);
-        while (opMode.isContinuing() && tilt.isBusy());
+        while (opMode.isContinuing() && isUntiltable(0));
     }
 
     public void tiltAsync(TiltPosition position) {
         if (!opMode.isContinuing() || isUntiltable(0)) return;
+        tiltIsBusy = true;
         tilt.setTargetPosition(position.ticks);
         tilt.setMode(RUN_TO_POSITION);
         tilt.setPower(0.5);
@@ -333,9 +346,14 @@ public class Robot {
     }
 
     private boolean isUntiltable(double power) {
+        if (tiltIsBusy) {
+            tiltIsBusy = tilt.isBusy();
+        }
+
         double yAccel = tilt_accelerometer.getAcceleration().yAccel;
 
-        return slide_limit_rear.getState() ||
+        return tiltIsBusy ||
+            slide_limit_rear.getState() ||
             (power < 0 && yAccel > BACK.accel) ||
             (power > 0 && yAccel < UP.accel);
     }
@@ -405,7 +423,7 @@ public class Robot {
             Recognition stone = findNearestStone(lookingForStone);
             if(stone == null){drive(0,0);continue;}
             double amountToTurn = stone.estimateAngleToObject(DEGREES) / 45;
-            drive(power, -amountToTurn + 0.075);
+            drive(power, -amountToTurn + 0.15);
             if(stone.getHeight() > 350) break;
         }
 
@@ -428,6 +446,13 @@ public class Robot {
         Telemetry telemetry = opMode.telemetry;
 
         orientation = getOrientation();
+
+        telemetry.addData("Drive","%.2f Pow", opMode.gamepad2.left_stick_y);
+        telemetry.addData("Turn","%.2f Pow", opMode.gamepad2.right_stick_x);
+        telemetry.addData("Drive (LF)","%.2f Pow, %d Pos", left_front.getPower(), left_front.getCurrentPosition());
+        telemetry.addData("Drive (LF)","%.2f Pow, %d Pos", left_front.getPower(), left_front.getCurrentPosition());
+        telemetry.addData("Drive (LF)","%.2f Pow, %d Pos", left_front.getPower(), left_front.getCurrentPosition());
+
 
         telemetry.addData("Drive (LF)","%.2f Pow, %d Pos", left_front.getPower(), left_front.getCurrentPosition());
         telemetry.addData("Drive (LR)","%.2f Pow, %d Pos", left_rear.getPower(), left_rear.getCurrentPosition());

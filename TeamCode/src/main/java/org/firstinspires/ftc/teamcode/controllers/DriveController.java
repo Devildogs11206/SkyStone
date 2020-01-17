@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.controllers;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 public class DriveController extends RobotController {
-    private static final double POWER = 0.75;
+    private static final double POWER = 0.67;
 
     public DriveController(OpMode opMode) {
         super(opMode);

@@ -9,15 +9,14 @@ import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.UP;
 public class Blue2Foundation extends BlueOpMode {
     @Override
     protected void execute() {
-        double power = 0.75;
+        double power = 0.5;
         robot.drive(power,0,4);
         robot.drive(power,45,12 );
         robot.drive(power,0,12);
+        robot.drive(-0.1,0,1);
         robot.tilt(UP);
-        robot.drive(-power,0,24);
-        robot.turn(power,90);
+        robot.drive(-power,0,36);
         robot.tilt(BACK);
-        robot.drive(-power,45,18);
-        robot.drive(-power,90,48);
+        robot.drive(-power,90,36);
     }
 }
