@@ -366,7 +366,7 @@ public class Robot {
         if (tilt_accelerometer.getAcceleration().yAccel > TILTED.accel) return;
 
         int minPos = 0;
-        int maxPos = 10000;
+        int maxPos = 5600;
 
         int position = lift.getCurrentPosition();
 
@@ -427,20 +427,27 @@ public class Robot {
         setLights(SEARCHING_COLOR);
         double power = 0.25;
 
+        Recognition stone = null;
+
         while(opMode.isContinuing()){
-            Recognition stone = findNearestStone(lookingForStone);
-            if(stone == null){drive(0,0);continue;}
-            double amountToTurn = stone.estimateAngleToObject(DEGREES) / 45;
-            drive(power, -amountToTurn + 0.15);
-            if(stone.getHeight() > 350) break;
+            stone = findNearestStone(lookingForStone);
+            if(stone != null) break;
         }
+
+        turn(power,getOrientation().firstAngle + stone.estimateAngleToObject(DEGREES)+7.95321);
+        while(opMode.isContinuing()){
+            stone = findNearestStone(lookingForStone);
+            if(stone == null){drive(0,0);}
+            else if(stone.getHeight()>300){break;}
+            else{drive(power,0);}
+        }
+
 
         drive(0,0);
 
-        drive(-power, getOrientation().firstAngle,4);
         claw(OPEN);
         tilt(UP);
-        drive(power, getOrientation().firstAngle,16);
+        drive(power, getOrientation().firstAngle,8);
         claw(CLOSE);
         tilt(TILTED);
 
@@ -462,7 +469,7 @@ public class Robot {
 
         double targetAngle = Math.toDegrees(Math.atan2(-skystonePosition.y, -skystonePosition.x));
         double currentAngle = skystoneOrientation.thirdAngle;
-        double heading = getOrientation().firstAngle + (targetAngle - currentAngle) - 5;
+        double heading = getOrientation().firstAngle + (targetAngle - currentAngle) - 10;
 
         double inches = Math.sqrt(
             Math.pow(skystonePosition.x, 2) +

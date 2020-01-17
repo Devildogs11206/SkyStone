@@ -41,7 +41,7 @@ public class Blue1Skystone extends BlueOpMode {
             robot.tilt(TILTED);
         }
 
-        robot.drive(-power, robot.getOrientation().firstAngle, 4);
+        robot.drive(-power, robot.getOrientation().firstAngle, 7);
         robot.drive(power, 90, 64);
         robot.claw(OPEN);
         robot.drive(-power, 90, 32);
