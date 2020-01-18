@@ -431,30 +431,19 @@ public class Robot {
 
         Recognition stone = null;
 
-        while(opMode.isContinuing()){
+        while (opMode.isContinuing()) {
             stone = findNearestStone(lookingForStone);
-            if(stone != null) break;
+            if (stone != null) break;
         }
 
-        double offset = ((-2 / 75) * stone.getHeight()) + 11.667;
+        turn(power, getOrientation().firstAngle + stone.estimateAngleToObject(DEGREES) + getOffset(stone));
 
-        turn(power,getOrientation().firstAngle + stone.estimateAngleToObject(DEGREES)+offset);
-        while(opMode.isContinuing()){
+        while (opMode.isContinuing()) {
             stone = findNearestStone(lookingForStone);
-            if(stone == null){drive(0,0);}
-            else if(stone.getHeight()>300){break;}
-            else{drive(power,0);}
+            if (stone == null) drive(0,0);
+            else if (stone.getHeight() > 250) break;
+            else drive(power, (stone.estimateAngleToObject(DEGREES) + getOffset(stone)) / 45);
         }
-
-         while(opMode.isContinuing()){
-             offset = ((-2 / 75) * stone.getHeight()) + 11.667;
-             double angle = stone.estimateAngleToObject(DEGREES)+offset;
-             if(stone == null){drive(0,0);}
-             else if(stone.getHeight()>250)break;
-             else{drive(power,angle/45);}
-         }
-
-
 
         drive(0,0);
 
@@ -468,6 +457,15 @@ public class Robot {
         sleep(0.5);
         setLights(DEFAULT_COLOR);
         stonePickUp = false;
+    }
+
+    private double getOffset(Recognition stone) {
+        // Linear Coordinates
+        final double x1 = 100/*height*/, y1 = 9/*degrees*/;
+        final double x2 = 250/*height*/, y2 = 5/*degrees*/;
+
+        // Linear Equation: y(x) = y1 + ((y2 - y1) / (x2 - x1)) * (x - x1)
+        return y1 + ((y2 - y1) / (x2 - x1)) * (stone.getHeight() - x1);
     }
 
     public void pickUpSkystone(){
