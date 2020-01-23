@@ -302,7 +302,7 @@ public class Robot {
     }
 
     public enum TiltPosition {
-        BACK(9.8, 0), TILTED(7.0, 1000), UP(-1.0, 3400);
+        BACK(9.8, 0), TILTED(7.0, 1000), UP(-1.0, 3400), FOUNDATION(-2.0,3600);
 
         public double accel;
         public int ticks;
@@ -365,7 +365,7 @@ public class Robot {
     }
 
     public void lift(double power) {
-        if (tilt_accelerometer.getAcceleration().yAccel > TILTED.accel) return;
+        //if (tilt_accelerometer.getAcceleration().yAccel > TILTED.accel) return;
 
         int minPos = 0;
         int maxPos = 5600;
@@ -442,14 +442,14 @@ public class Robot {
             stone = findNearestStone(lookingForStone);
             if (stone == null) drive(0,0);
             else if (stone.getHeight() > 250) break;
-            else drive(power, (stone.estimateAngleToObject(DEGREES) + getOffset(stone)) / 45);
+            else drive(power, (stone.estimateAngleToObject(DEGREES) + getOffset(stone)) / -45);
         }
 
         drive(0,0);
 
         claw(OPEN);
         tilt(UP);
-        drive(power, getOrientation().firstAngle,8);
+        drive(power, getOrientation().firstAngle,12);
         claw(CLOSE);
         tilt(TILTED);
 
@@ -461,12 +461,16 @@ public class Robot {
 
     private double getOffset(Recognition stone) {
         // Linear Coordinates
-        final double x1 = 100/*height*/, y1 = 9/*degrees*/;
-        final double x2 = 250/*height*/, y2 = 5/*degrees*/;
+        final double x1 = 140/*height*/, y1 = 14/*degrees*/;
+        final double x2 = 254/*height*/, y2 = 9/*degrees*/;
 
         // Linear Equation: y(x) = y1 + ((y2 - y1) / (x2 - x1)) * (x - x1)
         return y1 + ((y2 - y1) / (x2 - x1)) * (stone.getHeight() - x1);
     }
+
+    //more than 10 is 1
+    //between -10 and 10 is 2
+    //less than -10 is 3
 
     public void pickUpSkystone(){
         if (!opMode.isContinuing()) return;
@@ -480,7 +484,11 @@ public class Robot {
 
         double targetAngle = Math.toDegrees(Math.atan2(-skystonePosition.y, -skystonePosition.x));
         double currentAngle = skystoneOrientation.thirdAngle;
-        double heading = getOrientation().firstAngle + (targetAngle - currentAngle) - 10;
+        double heading = getOrientation().firstAngle + 0.8*(targetAngle - currentAngle);
+
+        if(heading <= -9 ){heading = -18;}
+        else if(heading >=9){heading = 18;}
+        else{heading = 0;}
 
         double inches = Math.sqrt(
             Math.pow(skystonePosition.x, 2) +
@@ -489,7 +497,7 @@ public class Robot {
 
         claw(OPEN);
         tilt(UP);
-        drive(power, heading, inches - 8);
+        drive(power, heading, inches - 6);
         claw(CLOSE);
         tilt(TILTED);
 
@@ -542,6 +550,8 @@ public class Robot {
                 telemetry.addData("  right,bottom", "%.3f , %.3f", recognition.getRight(), recognition.getBottom());
                 telemetry.addData("  height,width", "%.3f , %.3f", recognition.getHeight(), recognition.getWidth());
                 telemetry.addData("  angle", "%.3f", recognition.estimateAngleToObject(DEGREES));
+                telemetry.addData("  offset", "%.3f", getOffset(recognition));
+                telemetry.addData("  heading", "%.3f", recognition.estimateAngleToObject(DEGREES) + getOffset(recognition));
                 telemetry.addData("  area", "%.3f", recognition.getWidth() * recognition.getHeight());
 
                 if (recognition.getLabel().toLowerCase().contains("stone")) {

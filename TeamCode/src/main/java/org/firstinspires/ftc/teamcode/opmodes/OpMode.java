@@ -29,7 +29,9 @@ public abstract class OpMode extends LinearOpMode {
         robot.init(getAlliance());
         if (calibrate) robot.calibrate();
         waitForStart();
+        sleep(250);
         robot.start();
+        sleep(250);
         execute();
     }
 
