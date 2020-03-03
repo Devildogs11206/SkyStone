@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.controllers.ClawController;
 import org.firstinspires.ftc.teamcode.controllers.DriveController;
 import org.firstinspires.ftc.teamcode.controllers.LiftController;
 import org.firstinspires.ftc.teamcode.controllers.LightsController;
+import org.firstinspires.ftc.teamcode.controllers.RecorderController;
 import org.firstinspires.ftc.teamcode.controllers.RobotController;
 import org.firstinspires.ftc.teamcode.controllers.SlideController;
 import org.firstinspires.ftc.teamcode.controllers.StickController;
@@ -30,6 +31,7 @@ public class TeleOpMode extends OpMode {
     @Override
     protected void execute() {
         robotControllers = new RobotController[]{
+            new RecorderController(this),
             new DriveController(this),
             new LiftController(this),
             new ClawController(this),

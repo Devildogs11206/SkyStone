@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import java.util.List;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.controllers.RecorderController;
 import org.firstinspires.ftc.teamcode.opmodes.OpMode;
 
 import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.BLACK;
@@ -484,7 +485,7 @@ public class Robot {
 
         double targetAngle = Math.toDegrees(Math.atan2(-skystonePosition.y, -skystonePosition.x));
         double currentAngle = skystoneOrientation.thirdAngle;
-        double heading = getOrientation().firstAngle + 0.8*(targetAngle - currentAngle);
+        double heading = getOrientation().firstAngle + currentAngle;
 
         if(heading <= -9 ){heading = -18;}
         else if(heading >=9){heading = 18;}
@@ -538,6 +539,9 @@ public class Robot {
         telemetry.addData("Skystone Position (in)", skystonePosition);
         telemetry.addData("Skystone Orientation", skystoneOrientation);
         telemetry.addData("PickUpStone running", stonePickUp);
+
+        telemetry.addLine();
+
 
         Boolean stoneVisible = false;
 
