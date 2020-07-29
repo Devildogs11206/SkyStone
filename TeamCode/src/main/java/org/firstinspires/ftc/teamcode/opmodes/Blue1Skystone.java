@@ -1,11 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.AQUA;
-import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.CONFETTI;
-import static com.qualcomm.hardware.rev.RevBlinkinLedDriver.BlinkinPattern.HOT_PINK;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.CLOSE;
 import static org.firstinspires.ftc.teamcode.internal.Robot.ClawPosition.OPEN;
 import static org.firstinspires.ftc.teamcode.internal.Robot.TiltPosition.TILTED;
