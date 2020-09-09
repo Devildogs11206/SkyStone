@@ -24,6 +24,15 @@ public class Robot {
     private DcMotor left_drive;
     private DcMotor right_drive;
 
+    //Creating motors for mechanum wheels
+    private DcMotor mec_lf;
+    private DcMotor mec_lb;
+    private DcMotor mec_rf;
+    private DcMotor mec_rb;
+
+    //so they can all be "initialized" at once
+    private DcMotor[] mecs = {mec_lf,mec_lb,mec_rf,mec_rb};
+
     public Robot(OpMode opMode) {
         this.opMode = opMode;
     }
@@ -36,6 +45,12 @@ public class Robot {
 
         right_drive = hardwareMap.get(DcMotor.class,"right_front");
         right_drive.setDirection(REVERSE);
+
+        //defining all mechanum wheel motors from hardwareMap
+        for(int i=0;i<mecs.length;i++){
+            mecs[i] = hardwareMap.get(DcMotor.class,mecs[i].toString());
+        }
+
     }
 
     public void drive(double power, double turn) {
@@ -53,6 +68,17 @@ public class Robot {
 
         left_drive.setPower(left);
         right_drive.setPower(right);
+    }
+
+    //mecanum drive method
+    public void mecanumDrive(double lf, double lb, double rf, double rb){
+
+        //not doing much because everything done in MecanumController
+        mec_lf.setPower(lf);
+        mec_lb.setPower(lb);
+        mec_rf.setPower(rf);
+        mec_rb.setPower(rb);
+
     }
 
     public void addTelemetry(){
